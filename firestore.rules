@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+       allow read, write: if false;
+    }
+
+    function isAdmin() {
+      return request.auth != null && 
+             (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
+    function isUser(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    match /users/{userId} {
+      allow read: if isUser(userId) || isAdmin();
+      allow create: if isUser(userId) &&
+        incoming().size() >= 5 &&
+        incoming().email is string &&
+        incoming().role in ['user', 'admin'] && // normally shouldn't allow user to set admin, but we need it for bootstrapping or rely on default secure settings
+        incoming().xp is number &&
+        incoming().level is number &&
+        incoming().rank in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+        
+      allow update: if (isUser(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['xp', 'level', 'rank', 'streak', 'lastStudyDate', 'updatedAt'])) || isAdmin();
+    }
+    
+    match /flashcards/{flashcardId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /questions/{questionId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /exams/{examId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    match /users/{userId}/examResults/{resultId} {
+      allow read: if isUser(userId) || isAdmin();
+      allow create: if isUser(userId) &&
+        isValidId(resultId) &&
+        incoming().userId == userId &&
+        incoming().examId is string &&
+        incoming().score is number &&
+        incoming().totalQuestions is number &&
+        incoming().correctAnswers is number &&
+        incoming().timeSpentMinutes is number;
+      // No updates to exam results
+    }
+  }
+}

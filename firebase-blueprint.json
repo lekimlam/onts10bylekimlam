@@ -1,0 +1,105 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and gamification progress",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "username": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "rank": { "type": "string", "enum": ["Bronze", "Silver", "Gold", "Platinum", "Diamond"] },
+        "streak": { "type": "number" },
+        "lastStudyDate": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["email", "role", "xp", "level", "rank"]
+    },
+    "Flashcard": {
+      "title": "Flashcard",
+      "description": "Vocabulary flashcard",
+      "type": "object",
+      "properties": {
+        "word": { "type": "string" },
+        "meaning": { "type": "string" },
+        "pronunciation": { "type": "string" },
+        "example": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["word", "meaning"]
+    },
+    "Question": {
+      "title": "Practice Question",
+      "description": "Quiz or practice question",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["multiple_choice", "fill_blank", "sorting", "listening"] },
+        "content": { "type": "string" },
+        "options": { "type": "array" },
+        "correctAnswer": { "type": "string" },
+        "explanation": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["type", "content", "correctAnswer"]
+    },
+    "Exam": {
+      "title": "Mock Exam",
+      "description": "Mock exam containing multiple questions",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "durationMinutes": { "type": "number" },
+        "questions": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "durationMinutes"]
+    },
+    "ExamResult": {
+      "title": "Exam Result",
+      "description": "Result of a mock exam taken by a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "examId": { "type": "string" },
+        "score": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "correctAnswers": { "type": "number" },
+        "timeSpentMinutes": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "examId", "score"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/flashcards/{flashcardId}": {
+      "schema": { "$ref": "#/entities/Flashcard" },
+      "description": "Vocabulary flashcards"
+    },
+    "/questions/{questionId}": {
+      "schema": { "$ref": "#/entities/Question" },
+      "description": "Practice questions"
+    },
+    "/exams/{examId}": {
+      "schema": { "$ref": "#/entities/Exam" },
+      "description": "Mock exams"
+    },
+    "/users/{userId}/examResults/{resultId}": {
+      "schema": { "$ref": "#/entities/ExamResult" },
+      "description": "User exam results"
+    }
+  }
+}
