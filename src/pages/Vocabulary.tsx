@@ -94,65 +94,65 @@ export function Vocabulary() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto h-full pt-4 pb-8 flex flex-col items-center justify-center">
-      <div className="w-full flex justify-between items-end mb-8 px-4">
+    <div className="max-w-4xl mx-auto h-full pt-4 pb-20 md:pb-8 flex flex-col items-center justify-center px-4">
+      <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
         <div>
-          <span className="bg-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4 inline-block text-slate-500 border border-slate-200">Flashcard Pro</span>
-          <h1 className="text-4xl font-black text-slate-800 mb-2">Học từ vựng</h1>
-          <p className="text-slate-500 font-medium">Lật thẻ, nghe phát âm và luyện nhớ nghĩa từ vựng với AI.</p>
+          <span className="bg-white px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest mb-4 inline-block text-slate-500 border border-slate-200">Flashcard Pro</span>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-2">Học từ vựng</h1>
+          <p className="text-slate-500 font-medium text-sm md:text-base">Lật thẻ, nghe phát âm và luyện nhớ nghĩa từ vựng với AI.</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col items-end">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col items-end self-end md:self-auto">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tiến độ</span>
-          <div className="text-2xl font-black text-blue-600 leading-none">{currentIndex + 1} <span className="text-slate-300 text-lg">/ {cards.length}</span></div>
+          <div className="text-xl md:text-2xl font-black text-blue-600 leading-none">{currentIndex + 1} <span className="text-slate-300 text-lg">/ {cards.length}</span></div>
         </div>
       </div>
 
-      <div className="relative h-[450px] w-full max-w-2xl perspective-1000 mb-8" onClick={handleFlip}>
+      <div className="relative h-[400px] md:h-[450px] w-full max-w-2xl perspective-1000 mb-8" onClick={handleFlip}>
         <motion.div
           className="w-full h-full relative preserve-3d cursor-pointer"
           animate={{ rotateX: isFlipped ? 180 : 0 }}
           transition={{ duration: 0.6, type: 'spring', stiffness: 200, damping: 20 }}
         >
           {/* Front */}
-          <Card className="absolute inset-0 w-full h-full backface-hidden flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 to-blue-600 border-0 shadow-2xl rounded-[40px] overflow-hidden">
-            <h2 className="text-7xl font-black text-white tracking-tight z-10">{currentCard.word}</h2>
-            <div className="absolute inset-x-0 bottom-10 flex justify-center z-10">
-              <span className="px-6 py-3 bg-white/20 backdrop-blur-md text-white rounded-full font-bold uppercase tracking-widest text-sm animate-pulse border border-white/30 shadow-lg">
+          <Card className="absolute inset-0 w-full h-full backface-hidden flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 to-blue-600 border-0 shadow-2xl rounded-[32px] md:rounded-[40px] overflow-hidden p-6 text-center">
+            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tight z-10 break-words max-w-full">{currentCard.word}</h2>
+            <div className="absolute inset-x-0 bottom-10 flex justify-center z-10 px-4 text-center">
+              <span className="px-5 py-2 md:px-6 md:py-3 bg-white/20 backdrop-blur-md text-white rounded-full font-bold uppercase tracking-widest text-[10px] md:text-sm animate-pulse border border-white/30 shadow-lg whitespace-nowrap">
                 CHẠM ĐỂ LẬT THẺ
               </span>
             </div>
-            {/* Background decorative letters */}
+            {/* Background dekor */}
             <div className="absolute -right-20 -bottom-20 text-[250px] font-black text-white/10 pointer-events-none drop-shadow-2xl">{currentCard.word.charAt(0)}</div>
           </Card>
 
           {/* Back */}
-          <Card className="absolute inset-0 w-full h-full backface-hidden flex flex-col overflow-hidden bg-white border-2 border-slate-200 rounded-[40px] shadow-2xl" style={{ transform: 'rotateX(180deg)' }}>
-            <div className="flex-1 flex justify-between p-8 flex-col relative w-full h-full">
+          <Card className="absolute inset-0 w-full h-full backface-hidden flex flex-col overflow-hidden bg-white border-2 border-slate-200 rounded-[32px] md:rounded-[40px] shadow-2xl" style={{ transform: 'rotateX(180deg)' }}>
+            <div className="flex-1 flex justify-between p-6 md:p-8 flex-col relative w-full h-full">
 
-              <div className="absolute top-0 left-0 w-full h-32 bg-indigo-50 rounded-b-[40px] border-b border-indigo-100 flex items-center justify-between px-8">
-                  <div>
-                    <h2 className="text-4xl font-black text-slate-800 mb-1">{currentCard.word}</h2>
-                    <p className="text-lg text-indigo-600 font-mono font-bold tracking-tight">{currentCard.pronunciation}</p>
+              <div className="absolute top-0 left-0 w-full h-28 md:h-32 bg-indigo-50 rounded-b-[32px] md:rounded-b-[40px] border-b border-indigo-100 flex items-center justify-between px-6 md:px-8">
+                  <div className="max-w-[70%]">
+                    <h2 className="text-2xl md:text-4xl font-black text-slate-800 mb-1 truncate">{currentCard.word}</h2>
+                    <p className="text-base md:text-lg text-indigo-600 font-mono font-bold tracking-tight">{currentCard.pronunciation}</p>
                   </div>
                   <Button 
                     variant="outline" 
                     size="icon" 
-                    className="rounded-2xl w-14 h-14 bg-white text-indigo-600 border border-indigo-100 shadow-[0_4px_0_#e0e7ff] hover:-translate-y-[2px] active:translate-y-[2px] active:shadow-[0_2px_0_#e0e7ff] transition-none"
+                    className="rounded-2xl w-12 h-12 md:w-14 md:h-14 bg-white text-indigo-600 border border-indigo-100 shadow-[0_4px_0_#e0e7ff] hover:-translate-y-[2px] active:translate-y-[2px] active:shadow-[0_2px_0_#e0e7ff] transition-none"
                     onClick={(e) => { e.stopPropagation(); playAudio(currentCard.word); }}
                   >
-                    <Volume2 className="w-6 h-6" />
+                    <Volume2 className="w-5 h-5 md:w-6 md:h-6" />
                   </Button>
               </div>
             
-              <div className="mt-32 pt-8 flex-1 w-full space-y-6">
+              <div className="mt-28 pt-6 md:mt-32 md:pt-8 flex-1 w-full space-y-4 md:space-y-6">
                 <div>
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Định nghĩa</p>
-                  <p className="text-3xl font-bold text-slate-800 leading-tight">{currentCard.meaning}</p>
+                  <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 md:mb-3">Định nghĩa</p>
+                  <p className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">{currentCard.meaning}</p>
                 </div>
                 
-                <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Ví dụ</p>
-                  <p className="text-lg text-slate-600 font-medium italic">"{currentCard.example}"</p>
+                <div className="bg-slate-50 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-slate-100">
+                  <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Ví dụ</p>
+                  <p className="text-base md:text-lg text-slate-600 font-medium italic">"{currentCard.example}"</p>
                 </div>
               </div>
             </div>

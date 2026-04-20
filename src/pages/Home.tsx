@@ -15,19 +15,19 @@ export function Home() {
 
   return (
     <div className="flex flex-col h-full bg-[#F1F5F9] pb-8">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full text-left max-w-6xl mx-auto w-full pt-4">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full text-left max-w-6xl mx-auto w-full pt-4 px-4 md:px-0">
         
         {/* Main Hero Card */}
         <div className="col-span-1 border-0 md:col-span-8 space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full relative overflow-hidden bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] p-8 rounded-[32px] border-2 border-white shadow-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
+            className="w-full relative overflow-hidden bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] p-6 md:p-8 rounded-[32px] border-2 border-white shadow-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
           >
             <div className="relative z-10">
-              <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4 inline-block">Nền tảng ôn thi lớp 10</span>
-              <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight">Học tiếng Anh chuẩn <br/> đỗ nguyện vọng 1</h1>
-              <p className="text-indigo-100 text-lg mb-8 max-w-md">
+              <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest mb-4 inline-block">Nền tảng ôn thi lớp 10</span>
+              <h1 className="text-3xl md:text-5xl font-black mb-4 leading-tight">Học tiếng Anh chuẩn <br className="hidden md:block" /> đỗ nguyện vọng 1</h1>
+              <p className="text-indigo-100 text-base md:text-lg mb-8 max-w-md">
                 Trải nghiệm học tập hiện đại, cá nhân hóa với hệ thống bài tập phong phú, flashcard tương tác và các bài thi thử như thật.
               </p>
               <div className="flex flex-wrap gap-4">
@@ -73,8 +73,8 @@ export function Home() {
         </div>
 
         {/* Sidebar/Ranking section on the right */}
-        <div className="col-span-1 md:col-span-4 space-y-6">
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[320px]">
+        <div className="col-span-1 md:col-span-4 space-y-6 pb-20 md:pb-0">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col min-h-[320px]">
             <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
               <span>🏆</span> MỤC TIÊU CỦA BẠN
             </h3>

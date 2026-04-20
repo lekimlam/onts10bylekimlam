@@ -13,12 +13,12 @@ export function Practice() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto h-full pt-4 pb-8">
-      <div className="mb-8 p-8 rounded-[32px] bg-white border-2 border-slate-200 flex justify-between items-center bg-gradient-to-r from-white to-blue-50">
+    <div className="max-w-4xl mx-auto h-full pt-4 pb-20 md:pb-8 px-4 md:px-0">
+      <div className="mb-8 p-6 md:p-8 rounded-[32px] bg-white border-2 border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-gradient-to-r from-white to-blue-50">
         <div>
           <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4 inline-block">Trung tâm huấn luyện</span>
-          <h1 className="text-4xl font-black text-slate-800 mb-2">Luyện Tập Khắc Nghiệt</h1>
-          <p className="text-slate-500 font-medium">Bứt phá điểm số với các dạng bài thi chuẩn cấu trúc tuyển sinh lớp 10.</p>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-2">Luyện Tập Khắc Nghiệt</h1>
+          <p className="text-slate-500 font-medium text-sm md:text-base">Bứt phá điểm số với các dạng bài thi chuẩn cấu trúc tuyển sinh lớp 10.</p>
         </div>
         <div className="hidden md:flex gap-4">
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col items-center">

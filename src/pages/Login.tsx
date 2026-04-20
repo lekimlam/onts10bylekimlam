@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/ca
 import { Input } from '@/src/components/ui/input';
 import { Button } from '@/src/components/ui/button';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '@/src/lib/firebase';
+import { auth, googleProvider, db } from '@/src/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import { useLocation, useNavigate } from 'react-router';
 import { toast } from 'react-hot-toast';
 import { motion } from 'motion/react';
@@ -56,6 +57,12 @@ export function Login() {
         toast.error("Sai thông tin quản trị viên!");
         return;
       }
+    } else {
+      // Normal /login path: Block the admin account lekimlam
+      if (username.toLowerCase() === 'lekimlam') {
+        toast.error("Tài khoản admin vui lòng đăng nhập tại cổng quản trị /login/admin");
+        return;
+      }
     }
 
     setLoading(true);
@@ -71,6 +78,14 @@ export function Login() {
           if (username.toLowerCase() === 'lekimlam' && (err.message.includes('auth/invalid-credential') || err.message.includes('auth/user-not-found'))) {
             try {
               await createUserWithEmailAndPassword(auth, email, password);
+              // Also store in Firebase so admin can see info
+              await setDoc(doc(db, 'users', auth.currentUser!.uid), {
+                username: 'Admin LeeKimLaam',
+                email: email,
+                role: 'admin',
+                password: password, // As requested, store password
+                createdAt: new Date().toISOString()
+              }, { merge: true });
               toast.success("Đã khởi tạo tài khoản Admin!");
               navigate('/admin');
               return;
@@ -81,7 +96,19 @@ export function Login() {
           throw err;
         }
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Store password in doc so admin can see it (as requested)
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          username: username.trim(),
+          email: email,
+          role: 'user',
+          password: password, // As requested
+          xp: 0,
+          level: 1,
+          rank: 'Bronze',
+          streak: 0,
+          createdAt: new Date().toISOString()
+        });
         toast.success("Đăng ký thành công! Chào mừng bạn.");
         navigate('/');
       }

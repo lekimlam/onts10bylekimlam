@@ -13,9 +13,9 @@ export function Exam() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto h-full pt-4 pb-8 space-y-8">
+    <div className="max-w-4xl mx-auto h-full pt-4 pb-20 md:pb-8 space-y-8 px-4 md:px-0">
       {/* Header section */}
-      <div className="relative overflow-hidden p-10 rounded-[40px] bg-indigo-600 text-white shadow-2xl">
+      <div className="relative overflow-hidden p-6 md:p-10 rounded-[32px] md:rounded-[40px] bg-indigo-600 text-white shadow-2xl">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-400/20 rounded-full blur-3xl"></div>
         

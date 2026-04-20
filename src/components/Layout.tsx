@@ -1,26 +1,60 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router';
+import { Outlet, Link, useLocation, Navigate } from 'react-router';
 import { useAuth } from '@/src/lib/auth-context';
 import { BookOpen, Home, Layers, PlaySquare, Trophy, User, LogOut, Menu, X, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from './ui/button';
 
 export function Layout() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
-  const navItems = [
-    { name: 'Trang chủ', path: '/', icon: Home },
-    { name: 'Ngữ pháp', path: '/grammar', icon: BookOpen },
-    { name: 'Từ vựng (Flashcard)', path: '/vocabulary', icon: Layers },
-    { name: 'Luyện tập', path: '/practice', icon: PlaySquare },
-    { name: 'Thi thử', path: '/exam', icon: Trophy },
-  ];
+  const isLoginPage = location.pathname.startsWith('/login');
 
-  if (user?.email === 'lekimlam@eng10.pro') {
-    navItems.push({ name: 'Quản trị (Admin)', path: '/admin', icon: Settings });
+  // If loading auth, show a splash screen
+  if (authLoading) {
+    return (
+      <div className="h-screen w-full bg-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-16 bg-indigo-600 rounded-3xl flex items-center justify-center text-white font-black text-3xl animate-bounce shadow-[0_0_50px_rgba(79,70,229,0.4)]">
+            E
+          </div>
+          <p className="mt-8 text-indigo-400 font-bold uppercase tracking-[0.3em] animate-pulse">LeeKimLaam</p>
+        </div>
+      </div>
+    );
   }
+
+  // Strict Redirect for unauthenticated users
+  if (!user && !isLoginPage) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // If not logged in and on login page, hide the sidebar and background noise
+  if (!user && isLoginPage) {
+    return (
+      <div className="h-screen flex flex-col font-sans overflow-hidden">
+        <main className="flex-1 overflow-y-auto w-full">
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
+
+  const navItems = user?.role === 'admin' 
+    ? [
+        { name: 'Tổng quan', path: '/admin', icon: Home },
+        { name: 'Người dùng', path: '/admin', icon: User }, // Use anchors to section in Admin page or keep simple
+        { name: 'Cài đặt', path: '/admin', icon: Settings },
+      ]
+    : [
+        { name: 'Trang chủ', path: '/', icon: Home },
+        { name: 'Ngữ pháp', path: '/grammar', icon: BookOpen },
+        { name: 'Từ vựng (Flashcard)', path: '/vocabulary', icon: Layers },
+        { name: 'Luyện tập', path: '/practice', icon: PlaySquare },
+        { name: 'Thi thử', path: '/exam', icon: Trophy },
+      ];
 
   const closeMenu = () => setIsMobileMenuOpen(false);
 
