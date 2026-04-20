@@ -112,7 +112,7 @@ export function Login() {
           playsInline 
           className="absolute w-full h-full object-cover opacity-60"
         >
-          <source src="pcbylekimlam" type="video/mp4" />
+          <source src="pcbylekimlam.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-slate-900/40"></div>
       </div>
