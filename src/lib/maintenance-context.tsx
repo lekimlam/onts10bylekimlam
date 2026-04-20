@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { db } from './firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { AlertTriangle, Hammer, Clock } from 'lucide-react';
+import { useAuth } from './auth-context';
 
 interface MaintenanceContextType {
   isMaintenance: boolean;
@@ -13,6 +14,7 @@ export const useMaintenance = () => useContext(MaintenanceContext);
 
 export const MaintenanceProvider = ({ children }: { children: React.ReactNode }) => {
   const [isMaintenance, setIsMaintenance] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     // Listen to global settings for maintenance mode
@@ -28,7 +30,13 @@ export const MaintenanceProvider = ({ children }: { children: React.ReactNode })
     return () => unsubscribe();
   }, []);
 
-  if (isMaintenance) {
+  // Check if we should ignore maintenance mode for this user/path
+  const isAdmin = user?.role === 'admin';
+  const isLoginPage = typeof window !== 'undefined' && window.location.pathname.startsWith('/login');
+  
+  const shouldBlock = isMaintenance && !isAdmin && !isLoginPage;
+
+  if (shouldBlock && !authLoading) {
     return (
       <div className="fixed inset-0 z-[9999] bg-slate-900 flex items-center justify-center p-6 text-center overflow-hidden">
         {/* Animated Background for maintenance */}
@@ -50,7 +58,11 @@ export const MaintenanceProvider = ({ children }: { children: React.ReactNode })
             <Clock size={20} /> Dự kiến hoàn thành: 2 tiếng nữa
           </div>
           
-          <p className="mt-8 text-xs text-slate-500 font-bold uppercase tracking-widest">lekimlam coder team</p>
+          <div className="mt-8 pt-8 border-t border-white/10">
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-4">lekimlam coder team</p>
+            {/* Hidden admin access */}
+            <a href="/login/admin" className="text-[10px] text-slate-700 hover:text-slate-500 transition-colors">Admin Login</a>
+          </div>
         </div>
       </div>
     );
