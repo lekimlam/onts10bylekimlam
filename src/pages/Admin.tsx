@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, AppUser } from '@/src/lib/auth-context';
+import { useAuth } from '@/src/lib/auth-context';
 import { Navigate } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
-import { Users, BookOpen, Settings, AlertTriangle, CheckCircle2, Clock, Trash2, Key, Mail, Shield, User as UserIcon } from 'lucide-react';
+import { Users, BookOpen, Settings, AlertTriangle, CheckCircle2, Clock, Trash2, Key, Mail, Shield, User as UserIcon, X, Search } from 'lucide-react';
 import { db } from '@/src/lib/firebase';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { collection, query, getDocs, doc, getDoc, setDoc, deleteDoc, orderBy } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 
@@ -16,17 +16,8 @@ export function Admin() {
   const [updating, setUpdating] = useState(false);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-
-  useEffect(() => {
-    const fetchMaintenance = async () => {
-      const docRef = doc(db, 'settings', 'maintenance');
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        setIsMaintenance(snap.data().active || false);
-      }
-    };
-    fetchMaintenance();
-  }, []);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [newPassword, setNewPassword] = useState('');
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
@@ -41,6 +32,34 @@ export function Admin() {
       setLoadingUsers(false);
     }
   };
+
+  const handleUpdatePassword = async () => {
+    if (!editingUser || !newPassword) return;
+    setUpdating(true);
+    try {
+      const userRef = doc(db, 'users', editingUser.id);
+      await setDoc(userRef, { password: newPassword }, { merge: true });
+      setUsersList(prev => prev.map(u => u.id === editingUser.id ? { ...u, password: newPassword } : u));
+      toast.success("Đã đổi mật khẩu thành công!");
+      setEditingUser(null);
+      setNewPassword('');
+    } catch (err: any) {
+      toast.error("Lỗi khi đổi mật khẩu: " + err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchMaintenance = async () => {
+      const docRef = doc(db, 'settings', 'maintenance');
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        setIsMaintenance(snap.data().active || false);
+      }
+    };
+    fetchMaintenance();
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'users') {
@@ -75,7 +94,6 @@ export function Admin() {
     }
   };
 
-  // Strict check: Only admin account can see this
   if (!user || user.role !== 'admin') {
     return <Navigate to="/" />;
   }
@@ -88,7 +106,6 @@ export function Admin() {
 
   return (
     <div className="max-w-6xl mx-auto h-full pt-4 pb-20 md:pb-8 space-y-8 px-4 md:px-0">
-      {/* Tab Navigation */}
       <div className="flex gap-2 p-1 bg-white border-2 border-slate-200 rounded-3xl w-full md:w-fit overflow-x-auto no-scrollbar whitespace-nowrap">
         <button 
           onClick={() => setActiveTab('overview')}
@@ -112,7 +129,6 @@ export function Admin() {
 
       {activeTab === 'overview' && (
         <>
-          {/* Header section */}
           <div className="p-6 md:p-8 rounded-[32px] bg-white border-2 border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
             <div>
               <div className="flex items-center gap-2 md:gap-3 mb-2 flex-wrap">
@@ -131,7 +147,6 @@ export function Admin() {
             </div>
           </div>
 
-          {/* Stats grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {adminCards.map((card, i) => (
               <Card key={i} className="p-1 border-2 border-slate-100 shadow-none hover:border-slate-200 transition-colors">
@@ -174,31 +189,33 @@ export function Admin() {
 
       {activeTab === 'users' && (
         <div className="space-y-6">
-           <div className="flex justify-between items-center">
+           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h2 className="text-3xl font-black text-slate-800">Quản lý Người dùng</h2>
                 <p className="text-slate-500 font-medium">Danh sách toàn bộ tài khoản học viên và quản trị viên.</p>
               </div>
-              <Button onClick={fetchUsers} disabled={loadingUsers} className="rounded-2xl h-12 px-6 font-bold flex items-center gap-2">
-                <Clock size={18} className={loadingUsers ? 'animate-spin' : ''} />
-                {loadingUsers ? 'Đang tải...' : 'Làm mới dữ liệu'}
-              </Button>
+              <div className="flex gap-2 w-full md:w-auto">
+                 <Button onClick={fetchUsers} variant="outline" disabled={loadingUsers} className="rounded-2xl h-12 px-6 font-bold flex items-center gap-2 border-2">
+                   <Clock size={18} className={loadingUsers ? 'animate-spin' : ''} />
+                   {loadingUsers ? '...' : 'Làm mới dữ liệu'}
+                 </Button>
+              </div>
            </div>
 
-           <div className="bg-white border-2 border-slate-200 rounded-[32px] overflow-hidden">
+           <div className="bg-white border-2 border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full text-left">
+                <table className="w-full text-left border-collapse">
                    <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 font-bold text-slate-400 text-xs uppercase tracking-widest">
                          <th className="px-6 py-5">Người dùng</th>
                          <th className="px-6 py-5">Định danh</th>
-                         <th className="px-6 py-5">Vai trò</th>
+                         <th className="px-6 py-5 text-center">Vai trò</th>
                          <th className="px-6 py-5">Mật khẩu</th>
                          <th className="px-6 py-5">Ngày tạo</th>
-                         <th className="px-6 py-5 text-right">Thao tác</th>
+                         <th className="px-6 py-5 text-right px-8">Thao tác</th>
                       </tr>
                    </thead>
-                   <tbody className="divide-y divide-slate-100">
+                   <tbody className="divide-y divide-slate-100 font-medium">
                       {usersList.length === 0 && !loadingUsers ? (
                         <tr>
                            <td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-bold italic">Chưa có người dùng nào được tạo.</td>
@@ -206,49 +223,55 @@ export function Admin() {
                       ) : (
                         usersList.map((u) => (
                           <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 whitespace-nowrap">
                                <div className="flex items-center gap-3">
                                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black ${u.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
                                     {u.username.charAt(0).toUpperCase()}
                                   </div>
                                   <div>
                                     <div className="font-bold text-slate-800">{u.username}</div>
-                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-tighter">{u.id.substring(0, 8)}...</div>
+                                    <div className="text-[10px] text-slate-400 font-black uppercase tracking-tighter">{u.id.substring(0, 8)}</div>
                                   </div>
                                </div>
                             </td>
-                            <td className="px-6 py-4">
-                               <div className="flex flex-col">
-                                  <div className="flex items-center gap-1.5 text-sm font-bold text-slate-600 mb-1">
-                                    <Mail size={14} className="text-slate-400" /> {u.email}
-                                  </div>
-                                  <div className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
-                                    <UserIcon size={12} /> {u.email?.split('@')[0]}
-                                  </div>
-                               </div>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center gap-1.5 text-sm font-bold text-slate-600 mb-0.5">
+                                  <Mail size={14} className="text-slate-400" /> {u.email}
+                                </div>
                             </td>
-                            <td className="px-6 py-4">
-                               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 w-fit ${u.role === 'admin' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
-                                 <Shield size={10} /> {u.role === 'admin' ? 'Quản trị' : 'Thành viên'}
+                            <td className="px-6 py-4 text-center">
+                               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${u.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
+                                 <Shield size={10} /> {u.role === 'admin' ? 'Admin' : 'User'}
                                </span>
                             </td>
                             <td className="px-6 py-4">
                                <div className="flex items-center gap-2 font-mono text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl w-fit border border-indigo-100">
-                                  <Key size={14} className="text-indigo-400" /> {u.password || '••••••••'}
-                               </div>
+                                  <Key size={14} /> {u.password || '••••••••'}
+                                </div>
                             </td>
                             <td className="px-6 py-4 text-sm font-bold text-slate-400">
-                               {u.createdAt ? new Date(u.createdAt).toLocaleDateString('vi-VN') : '---'}
+                               {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '---'}
                             </td>
-                            <td className="px-6 py-4 text-right">
-                               <Button 
-                                onClick={() => deleteUserAtAdmin(u.id)}
-                                variant="ghost" 
-                                className="w-10 h-10 p-0 rounded-xl text-red-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                                disabled={u.role === 'admin'}
-                               >
-                                 <Trash2 size={18} />
-                               </Button>
+                            <td className="px-6 py-4 text-right px-8">
+                               <div className="flex justify-end gap-2">
+                                  <Button 
+                                    onClick={() => { setEditingUser(u); setNewPassword(u.password || ''); }}
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="w-10 h-10 rounded-xl text-indigo-400 hover:text-indigo-600 hover:bg-slate-100"
+                                  >
+                                    <Key size={18} />
+                                  </Button>
+                                  <Button 
+                                    onClick={() => deleteUserAtAdmin(u.id)}
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="w-10 h-10 rounded-xl text-red-400 hover:text-red-700"
+                                    disabled={u.role === 'admin'}
+                                  >
+                                    <Trash2 size={18} />
+                                  </Button>
+                               </div>
                             </td>
                           </tr>
                         ))
@@ -261,65 +284,75 @@ export function Admin() {
       )}
 
       {activeTab === 'settings' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-           {/* Maintenance Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 font-sans">
            <div className="bg-slate-900 p-8 rounded-[32px] text-white shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-              <Settings size={120} />
-            </div>
             <div className="relative z-10">
               <h2 className="text-2xl font-black mb-2 flex items-center gap-3">
                  <AlertTriangle className="text-amber-400" /> Hệ thống Bảo trì
               </h2>
-              <p className="text-slate-400 font-medium mb-8">Tính năng này cho phép tạm đóng hệ thống để cập nhật hoặc sửa lỗi.</p>
+              <p className="text-slate-400 font-medium mb-8 text-sm">Tính năng này cho phép chặn truy cập người dùng trong lúc nâng cấp.</p>
               
               <div className="space-y-6">
                 <div className="flex items-center justify-between p-6 bg-white/5 rounded-2xl border border-white/10">
                   <div>
                     <div className="font-bold text-lg">Chế độ bảo trì</div>
-                    <div className="text-sm text-slate-400">Ẩn toàn bộ tính năng và hiện thông báo bảo trì</div>
                   </div>
-                  <div className="flex items-center gap-2">
-                     <div 
-                      onClick={toggleMaintenance}
-                      className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${isMaintenance ? 'bg-amber-500' : 'bg-slate-700'}`}
-                     >
-                        <motion.div 
-                          animate={{ x: isMaintenance ? 24 : 0 }}
-                          className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"
-                        />
-                     </div>
-                     <span className="font-bold text-slate-400 uppercase text-xs tracking-widest">
-                       {isMaintenance ? 'ON' : 'OFF'}
-                     </span>
+                  <div 
+                    onClick={toggleMaintenance}
+                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${isMaintenance ? 'bg-amber-500' : 'bg-slate-700'}`}
+                   >
+                    <motion.div animate={{ x: isMaintenance ? 24 : 0 }} className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full" />
                   </div>
                 </div>
-
-                <div className="p-6 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-amber-200">
-                  <p className="text-sm font-medium">Lưu ý: Khi bật chế độ bảo trì, người dùng sẽ không thể truy cập các trang học tập. Chỉ trang đăng nhập admin mới mở.</p>
-                </div>
-
-                <Button 
-                  onClick={toggleMaintenance}
-                  disabled={updating}
-                  className="w-full h-14 rounded-2xl font-black bg-indigo-600 text-white shadow-none hover:bg-indigo-700 border-none"
-                >
-                  {updating ? 'ĐANG CẬP NHẬT...' : (isMaintenance ? 'TẮT CHẾ ĐỘ BẢO TRÌ' : 'BẬT CHẾ ĐỘ BẢO TRÌ')}
+                <Button onClick={toggleMaintenance} disabled={updating} className="w-full h-14 rounded-2xl font-black bg-indigo-600 text-white">
+                  {updating ? 'ĐANG CẬP NHẬT...' : (isMaintenance ? 'TẮT BẢO TRÌ' : 'BẬT BẢO TRÌ')}
                 </Button>
               </div>
             </div>
           </div>
-          
           <div className="bg-white p-8 rounded-[32px] border-2 border-slate-200 flex flex-col items-center justify-center text-center">
              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mb-4">
                 <CheckCircle2 size={40} />
              </div>
-             <h3 className="text-xl font-black text-slate-800 mb-2">Hỗ trợ Cài đặt</h3>
-             <p className="text-slate-500 font-medium mb-6">Liên hệ bộ phận kỹ thuật nếu bồ gặp vấn đề về bảo mật hoặc cấu hình.</p>
-             <Button variant="outline" className="rounded-xl font-bold">Hỗ trợ ngay</Button>
+             <h3 className="text-xl font-black text-slate-800 mb-2">Hỗ trợ 100% Cài đặt</h3>
+             <p className="text-slate-500 font-medium mb-6">Mọi thay đổi bồ thực hiện sẽ có hiệu lực ngay lập tức lên toàn bộ học sinh.</p>
           </div>
         </div>
       )}
+
+      {/* Edit User Modal */}
+      <AnimatePresence>
+         {editingUser && (
+           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                onClick={() => setEditingUser(null)}
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="bg-white rounded-[32px] p-8 w-full max-w-md relative z-10 shadow-2xl"
+              >
+                <div className="flex justify-between items-start mb-8">
+                  <div>
+                    <h3 className="text-3xl font-black text-slate-800 tracking-tight">Cấu hình User</h3>
+                    <p className="text-slate-500 font-medium">Bồ đang chỉnh sửa: <span className="text-indigo-600 font-black">{editingUser.username}</span></p>
+                  </div>
+                  <Button variant="ghost" onClick={() => setEditingUser(null)}><X size={24} /></Button>
+                </div>
+                <div className="space-y-6">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Reset Mật Khẩu (Plain Text)</label>
+                      <input type="text" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full h-14 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 font-bold" />
+                   </div>
+                   <Button onClick={handleUpdatePassword} disabled={updating || !newPassword} className="w-full h-14 rounded-2xl font-black bg-indigo-600 text-white">
+                      {updating ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
+                   </Button>
+                </div>
+              </motion.div>
+           </div>
+         )}
+      </AnimatePresence>
     </div>
   );
 }

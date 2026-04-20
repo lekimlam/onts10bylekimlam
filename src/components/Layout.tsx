@@ -31,6 +31,11 @@ export function Layout() {
     return <Navigate to="/login" replace />;
   }
 
+  // Redirect logged-in users away from login pages
+  if (user && isLoginPage) {
+    return <Navigate to={user.role === 'admin' ? '/admin' : '/'} replace />;
+  }
+
   // If not logged in and on login page, hide the sidebar and background noise
   if (!user && isLoginPage) {
     return (
