@@ -18,8 +18,8 @@ export function Layout() {
     { name: 'Thi thử', path: '/exam', icon: Trophy },
   ];
 
-  if (user?.role === 'admin') {
-    navItems.push({ name: 'Admin', path: '/admin', icon: Settings });
+  if (user?.email === 'lekimlam@eng10.pro') {
+    navItems.push({ name: 'Quản trị (Admin)', path: '/admin', icon: Settings });
   }
 
   const closeMenu = () => setIsMobileMenuOpen(false);

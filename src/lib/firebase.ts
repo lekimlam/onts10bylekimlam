@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { toast } from 'react-hot-toast';
 
@@ -11,7 +11,11 @@ const dbId = (firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreData
   ? firebaseConfig.firestoreDatabaseId 
   : undefined;
 
-export const db = dbId ? getFirestore(app, dbId) : getFirestore(app);
+// Use initializeFirestore with experimentalForceLongPolling to be more resilient in iframes/Vercel
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, dbId);
+
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 

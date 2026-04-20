@@ -50,6 +50,14 @@ export function Login() {
       return;
     }
 
+    // Strict Admin check for /login/admin path
+    if (isAdminPath) {
+      if (username.toLowerCase() !== 'lekimlam' || password !== '16052011') {
+        toast.error("Sai thông tin quản trị viên!");
+        return;
+      }
+    }
+
     setLoading(true);
     const email = getEmail(username.trim().toLowerCase());
     
@@ -94,9 +102,27 @@ export function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center py-16 h-full min-h-[500px]">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md">
-        <Card className="p-8">
+    <div className="relative flex justify-center items-center py-16 h-full min-h-[500px] overflow-hidden bg-slate-900">
+      {/* Video Background */}
+      <div className="fixed inset-0 z-0">
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline 
+          className="absolute w-full h-full object-cover opacity-60"
+        >
+          <source src="pcbylekimlam" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-slate-900/40"></div>
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        className="w-full max-w-md relative z-10"
+      >
+        <Card className="p-8 border-none shadow-2xl bg-white/95 backdrop-blur-md">
           <CardHeader className="text-center pb-6 px-0 pt-0">
             <CardTitle className="text-3xl font-black text-slate-800">
               {isAdminPath ? "Quản trị viên" : (isLogin ? "Chào mừng trở lại!" : "Tạo tài khoản mới")}
