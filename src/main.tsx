@@ -10,8 +10,12 @@ import { Grammar } from './pages/Grammar';
 import { Practice } from './pages/Practice';
 import { AuthProvider } from './lib/auth-context';
 import './index.css';
+import { testFirestoreConnection } from './lib/firebase';
 
-// Placeholder empty components for other pages to avoid errors
+// Test connection on boot
+testFirestoreConnection();
+
+// Placeholder empty components
 // const Practice = () => <div className="h-full flex items-center justify-center"><div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center max-w-md"><span className="text-4xl mb-4 block">🚧</span><h2 className="text-2xl font-black text-slate-800 mb-2">Trang đang xây dựng</h2><p className="text-slate-500 font-medium">Tính năng Luyện Tập sẽ sớm ra mắt. Vui lòng quay lại sau!</p></div></div>;
 const Exam = () => <div className="h-full flex items-center justify-center"><div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center max-w-md"><span className="text-4xl mb-4 block">🚧</span><h2 className="text-2xl font-black text-slate-800 mb-2">Trang đang xây dựng</h2><p className="text-slate-500 font-medium">Tính năng Thi Thử sẽ sớm ra mắt. Vui lòng quay lại sau!</p></div></div>;
 const Admin = () => <div className="h-full flex items-center justify-center"><div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center max-w-md"><span className="text-4xl mb-4 block">🚧</span><h2 className="text-2xl font-black text-slate-800 mb-2">Trang đang xây dựng</h2><p className="text-slate-500 font-medium">Khu vực Quản Trị sẽ sớm ra mắt. Vui lòng quay lại sau!</p></div></div>;

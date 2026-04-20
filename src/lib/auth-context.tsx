@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User as FirebaseUser, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { auth, db, handleFirestoreError } from './firebase';
 import { toast } from 'react-hot-toast';
 
 export interface AppUser {
@@ -38,9 +38,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUserData = async (firebaseUser: FirebaseUser) => {
     try {
       const userDocRef = doc(db, 'users', firebaseUser.uid);
-      const userDoc = await getDoc(userDocRef);
+      const userDoc = await getDoc(userDocRef).catch(e => handleFirestoreError(e, 'get', `users/${firebaseUser.uid}`));
       
-      if (userDoc.exists()) {
+      if (userDoc && userDoc.exists()) {
         const data = userDoc.data();
         setUser({
           uid: firebaseUser.uid,
@@ -74,12 +74,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           rank: newUser.rank,
           streak: newUser.streak,
           createdAt: new Date().toISOString()
-        });
+        }).catch(e => handleFirestoreError(e, 'create', `users/${firebaseUser.uid}`));
         setUser(newUser);
       }
     } catch (error) {
-      console.error("Error fetching user data", error);
-      toast.error("Không thể tải thông tin người dùng");
+      console.error("Error in fetchUserData", error);
     }
   };
 

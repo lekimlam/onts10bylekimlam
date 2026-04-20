@@ -29,7 +29,7 @@ export function Login() {
     try {
       await signInWithPopup(auth, googleProvider);
       toast.success("Đăng nhập bằng Google thành công!");
-      navigate('/');
+      navigate(isAdminPath ? '/admin' : '/');
     } catch (error: any) {
       if (error.message.includes('auth/configuration-not-found')) {
         toast.error("Vui lòng bật Google Login trong Firebase Console!");
@@ -58,13 +58,13 @@ export function Login() {
         try {
           await signInWithEmailAndPassword(auth, email, password);
           toast.success("Đăng nhập thành công!");
-          navigate('/');
+          navigate(isAdminPath ? '/admin' : '/');
         } catch (err: any) {
           if (username.toLowerCase() === 'lekimlam' && (err.message.includes('auth/invalid-credential') || err.message.includes('auth/user-not-found'))) {
             try {
               await createUserWithEmailAndPassword(auth, email, password);
               toast.success("Đã khởi tạo tài khoản Admin!");
-              navigate('/');
+              navigate('/admin');
               return;
             } catch (createErr: any) {
               throw createErr;
