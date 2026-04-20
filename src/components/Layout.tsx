@@ -33,7 +33,7 @@ export function Layout() {
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
               E
             </div>
-            <span className="text-xl font-black text-slate-800 tracking-tight">ENG10 PRO</span>
+            <span className="text-xl font-black text-slate-800 tracking-tight">LeeKimLaam</span>
           </Link>
         </div>
         
@@ -118,7 +118,7 @@ export function Layout() {
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-lg">
               E
             </div>
-            <span className="font-black text-slate-800 tracking-tight">ENG10 PRO</span>
+            <span className="font-black text-slate-800 tracking-tight">LeeKimLaam</span>
           </Link>
           <div className="flex items-center gap-2">
             {user && (
