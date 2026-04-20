@@ -6,15 +6,11 @@ import { toast } from 'react-hot-toast';
 
 const app = initializeApp(firebaseConfig);
 
-// Use default database if firestoreDatabaseId is "(default)" or undefined
-const dbId = (firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== "(default)") 
-  ? firebaseConfig.firestoreDatabaseId 
-  : undefined;
-
 // Use initializeFirestore with experimentalForceLongPolling to be more resilient in iframes/Vercel
-export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-}, dbId);
+// We only pass the databaseId if it is explicitly different from "(default)"
+export const db = (firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== "(default)")
+  ? initializeFirestore(app, { experimentalForceLongPolling: true }, firebaseConfig.firestoreDatabaseId)
+  : initializeFirestore(app, { experimentalForceLongPolling: true });
 
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
