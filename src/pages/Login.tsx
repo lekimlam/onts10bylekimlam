@@ -5,11 +5,13 @@ import { Input } from '@/src/components/ui/input';
 import { Button } from '@/src/components/ui/button';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '@/src/lib/firebase';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { toast } from 'react-hot-toast';
 import { motion } from 'motion/react';
 
 export function Login() {
+  const location = useLocation();
+  const isAdminPath = location.pathname === '/login/admin';
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -97,10 +99,13 @@ export function Login() {
         <Card className="p-8">
           <CardHeader className="text-center pb-6 px-0 pt-0">
             <CardTitle className="text-3xl font-black text-slate-800">
-              {isLogin ? "Chào mừng trở lại!" : "Tạo tài khoản mới"}
+              {isAdminPath ? "Quản trị viên" : (isLogin ? "Chào mừng trở lại!" : "Tạo tài khoản mới")}
             </CardTitle>
             <p className="text-sm font-medium text-slate-500 mt-2">
-              {isLogin ? "Đăng nhập để tiếp tục hành trình học tập." : "Gia nhập để luyện thi tiếng Anh 10."}
+              {isAdminPath 
+                ? "Truy cập bảng điều khiển quản trị hệ thống." 
+                : (isLogin ? "Đăng nhập để tiếp tục hành trình học tập." : "Gia nhập để luyện thi tiếng Anh 10.")
+              }
             </p>
           </CardHeader>
           <CardContent className="px-0 pb-0">
@@ -168,24 +173,28 @@ export function Login() {
               Đăng nhập với Google
             </Button>
             
-            <div className="mt-8 text-center text-sm font-medium text-slate-500">
-              {isLogin ? "Chưa có tài khoản? " : "Đã có tài khoản? "}
-              <button 
-                onClick={() => setIsLogin(!isLogin)} 
-                className="font-bold text-indigo-600 hover:underline"
-                disabled={loading}
-              >
-                {isLogin ? "Tạo ngay" : "Đăng nhập"}
-              </button>
-            </div>
+            {!isAdminPath && (
+              <div className="mt-8 text-center text-sm font-medium text-slate-500">
+                {isLogin ? "Chưa có tài khoản? " : "Đã có tài khoản? "}
+                <button 
+                  onClick={() => setIsLogin(!isLogin)} 
+                  className="font-bold text-indigo-600 hover:underline"
+                  disabled={loading}
+                >
+                  {isLogin ? "Tạo ngay" : "Đăng nhập"}
+                </button>
+              </div>
+            )}
             
-            <div className="mt-8 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-sm text-amber-800">
-              <p className="font-bold mb-1 flex items-center gap-2"><span className="text-lg">👑</span> Dành cho Admin:</p>
-              <p className="font-medium">Hệ thống có tài khoản demo: <br/>username: <b className="font-bold">lekimlam</b> <br/> password: <b className="font-bold">16052011</b></p>
-              <p className="mt-2 text-xs italic text-amber-600">
-                (Lưu ý: Nếu bị lỗi, hãy đảm bảo bạn đã bật <b>Email/Password</b> trong Firebase Auth)
-              </p>
-            </div>
+            {isAdminPath && (
+              <div className="mt-8 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-sm text-amber-800">
+                <p className="font-bold mb-1 flex items-center gap-2"><span className="text-lg">👑</span> Dành cho Admin:</p>
+                <p className="font-medium">Hệ thống có tài khoản demo: <br/>username: <b className="font-bold">lekimlam</b> <br/> password: <b className="font-bold">16052011</b></p>
+                <p className="mt-2 text-xs italic text-amber-600">
+                  (Lưu ý: Nếu bị lỗi, hãy đảm bảo bạn đã bật <b>Email/Password</b> trong Firebase Auth)
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>

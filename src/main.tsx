@@ -25,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
+            <Route path="login/admin" element={<Login />} />
             <Route path="grammar" element={<Grammar />} />
             <Route path="vocabulary" element={<Vocabulary />} />
             <Route path="practice" element={<Practice />} />
