@@ -10,6 +10,7 @@ export function Layout() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isFabOpen, setIsFabOpen] = React.useState(false);
+  const [deviceMode, setDeviceMode] = React.useState<'pc' | 'mobile'>('pc');
 
   const isLoginPage = location.pathname.startsWith('/login');
 
@@ -19,9 +20,9 @@ export function Layout() {
       <div className="h-screen w-full bg-slate-900 flex items-center justify-center">
         <div className="flex flex-col items-center">
           <div className="w-16 h-16 bg-indigo-600 rounded-3xl flex items-center justify-center text-white font-black text-3xl animate-bounce shadow-[0_0_50px_rgba(79,70,229,0.4)]">
-            E
+            A
           </div>
-          <p className="mt-8 text-indigo-400 font-bold uppercase tracking-[0.3em] animate-pulse">LeeKimLaam</p>
+          <p className="mt-8 text-indigo-400 font-bold uppercase tracking-[0.3em] animate-pulse">AdminLeKimLam</p>
         </div>
       </div>
     );
@@ -75,9 +76,9 @@ export function Layout() {
         <div className="flex items-center gap-3 px-2">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-              E
+              A
             </div>
-            <span className="text-xl font-black text-slate-800 tracking-tight">LeeKimLaam</span>
+            <span className="text-xl font-black text-slate-800 tracking-tight">AdminLeKimLam</span>
           </Link>
         </div>
         
@@ -160,9 +161,9 @@ export function Layout() {
         <header className="md:hidden h-16 bg-white/60 backdrop-blur-lg border-b border-slate-200 px-4 flex items-center justify-between z-20 shrink-0">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-lg">
-              E
+              A
             </div>
-            <span className="font-black text-slate-800 tracking-tight">LeeKimLaam</span>
+            <span className="font-black text-slate-800 tracking-tight">AdminLeKimLam</span>
           </Link>
           <div className="flex items-center gap-2">
             {user && (
@@ -242,8 +243,19 @@ export function Layout() {
         </AnimatePresence>
 
         {/* Main View Area */}
-        <main className="flex-1 overflow-y-auto w-full p-4 md:p-8 relative">
-          <Outlet />
+        <main className={`flex-1 overflow-y-auto w-full p-4 md:p-8 relative ${deviceMode === 'mobile' ? 'flex flex-col items-center bg-slate-900 justify-start pt-10' : ''}`}>
+          {deviceMode === 'mobile' ? (
+            <div className="bg-white rounded-[3rem] border-[12px] border-slate-800 shadow-2xl w-[375px] h-[750px] overflow-hidden relative shrink-0">
+               <div className="h-6 bg-slate-800 flex items-center justify-center">
+                  <div className="w-20 h-4 bg-slate-900 rounded-full"></div>
+               </div>
+               <div className="h-[calc(100%-24px)] overflow-y-auto w-full p-4 no-scrollbar">
+                  <Outlet />
+               </div>
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
 
@@ -259,13 +271,15 @@ export function Layout() {
             >
               <button 
                 title="Giao diện Máy tính"
-                className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-blue-600 border-2 border-blue-50 hover:bg-blue-50 transition-all group"
+                onClick={() => setDeviceMode('pc')}
+                className={`w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center border-2 transition-all group ${deviceMode === 'pc' ? 'text-indigo-600 border-indigo-100' : 'text-slate-400 border-slate-50'}`}
               >
                 <Laptop className="w-5 h-5 group-hover:scale-110 transition-transform" />
               </button>
               <button 
                 title="Giao diện Điện thoại"
-                className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-emerald-600 border-2 border-emerald-50 hover:bg-emerald-50 transition-all group"
+                onClick={() => setDeviceMode('mobile')}
+                className={`w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center border-2 transition-all group ${deviceMode === 'mobile' ? 'text-indigo-600 border-indigo-100' : 'text-slate-400 border-slate-50'}`}
               >
                 <Smartphone className="w-5 h-5 group-hover:scale-110 transition-transform" />
               </button>

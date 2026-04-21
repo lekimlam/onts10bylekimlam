@@ -3,29 +3,46 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import { Volume2, ArrowRight, CheckCircle2, XCircle, Award } from 'lucide-react';
+import { Volume2, ArrowRight, CheckCircle2, XCircle, Award, Loader2 } from 'lucide-react';
 import { useAuth } from '@/src/lib/auth-context';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, increment, collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/src/lib/firebase';
 import { toast } from 'react-hot-toast';
 import { GoogleGenAI } from '@google/genai';
 
-// Mock words since we don't have enough in DB yet
-const mockFlashcards = [
-  { id: '1', word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.' },
-  { id: '2', word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'Sustainable development is crucial.' },
-  { id: '3', word: 'Acknowledge', meaning: 'Công nhận, thừa nhận', pronunciation: '/əkˈnɒlɪdʒ/', example: 'He refused to acknowledge his mistake.' },
-  { id: '4', word: 'Contribute', meaning: 'Đóng góp', pronunciation: '/kənˈtrɪbjuːt/', example: 'Everyone should contribute to the project.' }
-];
-
 export function Vocabulary() {
   const { user, refreshUser } = useAuth();
-  const [cards, setCards] = useState(mockFlashcards);
+  const [cards, setCards] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [userInput, setUserInput] = useState('');
   const [feedback, setFeedback] = useState<'pending' | 'correct' | 'incorrect'>('pending');
   const [checking, setChecking] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFlashcards = async () => {
+      try {
+        const q = query(collection(db, 'flashcards'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (list.length > 0) {
+          setCards(list);
+        } else {
+          // Fallback to initial seed if empty
+          setCards([
+            { id: '1', word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.' },
+            { id: '2', word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'Sustainable development is crucial.' }
+          ]);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFlashcards();
+  }, []);
 
   const currentCard = cards[currentIndex];
 
@@ -40,14 +57,14 @@ export function Vocabulary() {
   };
 
   const handleFlip = () => {
-    if (!isFlipped) {
+    if (!isFlipped && currentCard) {
       setIsFlipped(true);
       playAudio(currentCard.word);
     }
   };
 
   const checkAnswer = async () => {
-    if (!userInput.trim()) return;
+    if (!userInput.trim() || !currentCard) return;
     setChecking(true);
     
     try {
@@ -57,7 +74,7 @@ export function Vocabulary() {
       Is the user's answer reasonably correct or close enough? Respond ONLY with "YES" or "NO".`;
       
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt,
       });
       
@@ -93,6 +110,22 @@ export function Vocabulary() {
     setCurrentIndex((prev) => (prev + 1) % cards.length);
   };
 
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!currentCard) {
+    return (
+      <div className="h-full flex items-center justify-center text-slate-500 font-bold">
+        Chưa có thẻ từ vựng nào được tạo.
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto h-full pt-4 pb-20 md:pb-8 flex flex-col items-center justify-center px-4">
       <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
@@ -121,14 +154,12 @@ export function Vocabulary() {
                 CHẠM ĐỂ LẬT THẺ
               </span>
             </div>
-            {/* Background dekor */}
             <div className="absolute -right-20 -bottom-20 text-[250px] font-black text-white/10 pointer-events-none drop-shadow-2xl">{currentCard.word.charAt(0)}</div>
           </Card>
 
           {/* Back */}
           <Card className="absolute inset-0 w-full h-full backface-hidden flex flex-col overflow-hidden bg-white border-2 border-slate-200 rounded-[32px] md:rounded-[40px] shadow-2xl" style={{ transform: 'rotateX(180deg)' }}>
             <div className="flex-1 flex justify-between p-6 md:p-8 flex-col relative w-full h-full">
-
               <div className="absolute top-0 left-0 w-full h-28 md:h-32 bg-indigo-50 rounded-b-[32px] md:rounded-b-[40px] border-b border-indigo-100 flex items-center justify-between px-6 md:px-8">
                   <div className="max-w-[70%]">
                     <h2 className="text-2xl md:text-4xl font-black text-slate-800 mb-1 truncate">{currentCard.word}</h2>
@@ -149,7 +180,6 @@ export function Vocabulary() {
                   <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 md:mb-3">Định nghĩa</p>
                   <p className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">{currentCard.meaning}</p>
                 </div>
-                
                 <div className="bg-slate-50 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-slate-100">
                   <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Ví dụ</p>
                   <p className="text-base md:text-lg text-slate-600 font-medium italic">"{currentCard.example}"</p>

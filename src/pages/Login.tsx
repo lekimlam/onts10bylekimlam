@@ -80,7 +80,7 @@ export function Login() {
               await createUserWithEmailAndPassword(auth, email, password);
               // Also store in Firebase so admin can see info
               await setDoc(doc(db, 'users', auth.currentUser!.uid), {
-                username: 'Admin LeeKimLaam',
+                username: 'AdminLeKimLam',
                 email: email,
                 role: 'admin',
                 password: password, // As requested, store password

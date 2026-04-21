@@ -1,16 +1,45 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
-import { Trophy, Clock, FileText, ChevronRight, Star } from 'lucide-react';
+import { Trophy, Clock, FileText, ChevronRight, Star, Loader2 } from 'lucide-react';
 import { Link } from 'react-router';
+import { db } from '@/src/lib/firebase';
+import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 
 export function Exam() {
-  const examList = [
-    { id: 'mid-term-1', title: 'Đề thi giữa kỳ I - 2024', duration: '60 phút', status: 'Sẵn sàng', difficulty: 'Vừa', type: 'Chuẩn cấu trúc' },
-    { id: 'final-term-1', title: 'Đề thi cuối kỳ I - 2024', duration: '90 phút', status: 'Mới', difficulty: 'Khó', type: 'Đề thi thực tế' },
-    { id: 'mock-test-1', title: 'Đề luyện thi vào 10 #1', duration: '60 phút', status: 'Hot', difficulty: 'Rất Khó', type: 'Đề minh họa' },
-    { id: 'mock-test-2', title: 'Đề luyện thi vào 10 #2', duration: '60 phút', status: 'Sẵn sàng', difficulty: 'Vừa', type: 'Đề minh họa' },
-  ];
+  const [exams, setExams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const q = query(collection(db, 'exams'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (list.length > 0) {
+          setExams(list);
+        } else {
+          setExams([
+            { id: 'mid-term-1', title: 'Đề thi giữa kỳ I - 2024', durationMinutes: 60, difficulty: 'Trung bình', description: 'Đề thi bám sát chương trình' },
+            { id: 'final-term-1', title: 'Đề thi cuối kỳ I - 2024', durationMinutes: 90, difficulty: 'Khó', description: 'Đề thi thử thực tế' }
+          ]);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExams();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto h-full pt-4 pb-20 md:pb-8 space-y-8 px-4 md:px-0">
@@ -43,7 +72,7 @@ export function Exam() {
         </div>
         
         <div className="space-y-4">
-          {examList.map((exam) => (
+          {exams.map((exam) => (
             <Card key={exam.id} className="group hover:border-indigo-600 transition-all border-2 border-slate-100 shadow-none hover:shadow-xl hover:shadow-indigo-500/5">
               <div className="p-6 flex flex-col md:flex-row md:items-center gap-6">
                 <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -53,19 +82,12 @@ export function Exam() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-xl font-black text-slate-800">{exam.title}</h3>
-                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                      exam.status === 'Hot' ? 'bg-red-100 text-red-600' : 
-                      exam.status === 'Mới' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'
-                    }`}>
-                      {exam.status}
-                    </span>
+                    <span className="px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest">Sẵn sàng</span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm font-bold text-slate-400">
-                    <span className="flex items-center gap-1.5"><Clock size={14} /> {exam.duration}</span>
-                    <span className="flex items-center gap-1.5"><FileText size={14} /> {exam.type}</span>
-                    <span className="flex items-center gap-1.5"><Star size={14} /> Độ khó: <span className={
-                      exam.difficulty === 'Rất Khó' ? 'text-red-500' : 
-                      exam.difficulty === 'Khó' ? 'text-amber-500' : 'text-emerald-500'
+                  <div className="flex flex-wrap items-center gap-4 text-sm font-bold text-slate-400">
+                    <span className="flex items-center gap-1.5"><Clock size={14} /> {exam.durationMinutes} phút</span>
+                    <span className="flex items-center gap-1.5 font-bold"><Star size={14} /> Độ khó: <span className={
+                      exam.difficulty === 'hard' || exam.difficulty === 'Khó' ? 'text-red-500' : 'text-emerald-500'
                     }>{exam.difficulty}</span></span>
                   </div>
                 </div>
