@@ -113,11 +113,21 @@ export function Grammar() {
                 <Card className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl font-bold text-xl drop-shadow-sm">A+</div>
-                    <span className="text-xs font-bold text-slate-400 uppercase">Cấu trúc</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase">Công thức & Cấu trúc</span>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-4">Công thức chính</h3>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 font-mono text-sm whitespace-pre-wrap leading-relaxed text-indigo-700 font-bold">
-                    {activeLesson.structure}
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-black text-slate-400 uppercase mb-2">Công thức chính</h3>
+                      <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 font-mono text-lg text-indigo-700 font-black">
+                        {activeLesson.formula || 'Chưa cập nhật công thức'}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-400 uppercase mb-2">Chi tiết cấu trúc</h3>
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 font-mono text-sm whitespace-pre-wrap leading-relaxed text-slate-700 font-bold">
+                        {activeLesson.structure}
+                      </div>
+                    </div>
                   </div>
                 </Card>
 
@@ -129,15 +139,31 @@ export function Grammar() {
                     </div>
                     <h3 className="text-xl font-bold text-slate-800 mb-2">Dấu hiệu nhận biết</h3>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {activeLesson.signs?.map((sign: string) => (
-                        <span key={sign} className="px-3 py-1.5 bg-amber-50 text-amber-600 text-xs rounded-lg font-black border border-amber-100 uppercase tracking-wide">
-                          {sign}
-                        </span>
-                      ))}
+                      {Array.isArray(activeLesson.signs) ? (
+                        activeLesson.signs.map((sign: string) => (
+                          <span key={sign} className="px-3 py-1.5 bg-amber-50 text-amber-600 text-xs rounded-lg font-black border border-amber-100 uppercase tracking-wide">
+                            {sign}
+                          </span>
+                        ))
+                      ) : activeLesson.signs ? (
+                        activeLesson.signs.split(',').map((sign: string) => (
+                          <span key={sign.trim()} className="px-3 py-1.5 bg-amber-50 text-amber-600 text-xs rounded-lg font-black border border-amber-100 uppercase tracking-wide">
+                            {sign.trim()}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-slate-400 italic text-xs">Không có dấu hiệu đặc biệt</span>
+                      )}
                     </div>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-xl text-sm italic font-medium text-slate-600 border border-slate-100">
-                    “{activeLesson.example || 'Example sentence goes here...'}”
+                  <div className="bg-slate-50 p-4 rounded-xl text-sm italic font-medium text-slate-600 border border-slate-100 space-y-2">
+                    {Array.isArray(activeLesson.examples) ? (
+                      activeLesson.examples.map((ex: string, idx: number) => (
+                        <p key={idx}>“{ex}”</p>
+                      ))
+                    ) : (
+                      <p>“{activeLesson.examples || activeLesson.example || 'Example sentence goes here...'}”</p>
+                    )}
                   </div>
                 </Card>
               </div>

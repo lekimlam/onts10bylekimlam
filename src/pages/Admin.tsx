@@ -66,58 +66,172 @@ export function Admin() {
       // Grammar Seeds
       const grammarRef = collection(db, 'grammar');
       const grammarItems = [
-        {
-          title: 'Thì Hiện Tại Đơn (Present Simple)',
-          description: 'Diễn tả thói quen, sự thật hiển nhiên.',
-          formula: 'S + V(s/es)',
-          signs: 'always, usually, often, every day...',
-          structure: 'Khẳng định: S + V(s/es)\nPhủ định: S + do/does + not + V\nNghi vấn: Do/Does + S + V?',
-          examples: ['I usually get up at 6 AM.', 'The sun rises in the East.'],
-          createdAt: now
+      {
+        title: 'Thì Hiện Tại Đơn (Present Simple)',
+        description: 'Diễn tả thói quen, sự thật hiển nhiên.',
+        formula: 'S + V(s/es)',
+        signs: ['always', 'usually', 'often', 'every day'],
+        structure: 'Khẳng định: S + V(s/es)\nPhủ định: S + do/does + not + V\nNghi vấn: Do/Does + S + V?',
+        examples: ['I usually get up at 6 AM.', 'The sun rises in the East.'],
+        quiz: {
+          question: 'She _____ (watch) TV every evening.',
+          options: ['watch', 'watches', 'watching', 'is watch'],
+          correct: 'watches'
         },
-        {
-          title: 'Thì Hiện Tại Tiếp Diễn',
-          description: 'Đang xảy ra tại thời điểm nói.',
-          formula: 'S + am/is/are + V-ing',
-          signs: 'now, at the moment, look!, listen!',
-          structure: 'Khẳng định: S + am/is/are + V-ing\nPhủ định: S + am/is/are + not + V-ing\nNghi vấn: Am/Is/Are + S + V-ing?',
-          examples: ['She is reading a book now.', 'They are playing soccer.'],
-          createdAt: now
+        createdAt: now
+      },
+      {
+        title: 'Thì Hiện Tại Tiếp Diễn',
+        description: 'Đang xảy ra tại thời điểm nói.',
+        formula: 'S + am/is/are + V-ing',
+        signs: ['now', 'at the moment', 'look', 'listen'],
+        structure: 'Khẳng định: S + am/is/are + V-ing\nPhủ định: S + am/is/are + not + V-ing\nNghi vấn: Am/Is/Are + S + V-ing?',
+        examples: ['She is reading a book now.', 'They are playing soccer.'],
+        quiz: {
+          question: 'Look! They _____ (run) over there.',
+          options: ['run', 'runs', 'are running', 'is running'],
+          correct: 'are running'
         },
+        createdAt: now
+      },
         {
           title: 'Câu Bị Động (Passive Voice)',
           description: 'Nhấn mạnh vào hành động thay vì người thực hiện.',
           formula: 'S + be + V3/ed',
-          signs: 'by + agent',
+          signs: ['by', 'made in', 'born in'],
           structure: 'Hiện tại đơn: S + am/is/are + V3/ed\nQuá khứ đơn: S + was/were + V3/ed',
           examples: ['This cake was made by my mom.', 'English is spoken all over the world.'],
+          quiz: {
+            question: 'The letter _____ (write) by Alice yesterday.',
+            options: ['writes', 'wrote', 'was written', 'is written'],
+            correct: 'was written'
+          },
           createdAt: now
         },
         {
           title: 'Câu Điều Kiện Loại 1',
           description: 'Sự việc có thể xảy ra ở hiện tại hoặc tương lai.',
           formula: 'If + S + V(s/es), S + will + V',
-          signs: 'If, unless',
+          signs: ['If', 'unless'],
           structure: 'Mệnh đề If: Hiện tại đơn\nMệnh đề chính: Tương lai đơn (will + V)',
           examples: ['If it rains, I will stay at home.', 'If you study hard, you will pass the exam.'],
+          quiz: {
+            question: 'If you _____ (not/study), you will fail the test.',
+            options: ['don\'t study', 'doesn\'t study', 'not study', 'won\'t study'],
+            correct: 'don\'t study'
+          },
           createdAt: now
         },
         {
           title: 'Mệnh đề quan hệ (Relative Clauses)',
           description: 'Dùng who, whom, whose, which, that để nối câu.',
           formula: 'Noun + Relative Pronoun + ...',
-          signs: 'who, whom, whose, which, that',
+          signs: ['who', 'whom', 'whose', 'which', 'that'],
           structure: 'Who: thay cho người (chủ ngữ)\nWhom: thay cho người (tân ngữ)\nWhose: chỉ sở hữu\nWhich: thay cho vật',
           examples: ['The man who is standing there is my teacher.', 'The book which I bought yesterday is interesting.'],
+          quiz: {
+            question: 'The girl _____ is singing is my sister.',
+            options: ['who', 'whom', 'whose', 'which'],
+            correct: 'who'
+          },
           createdAt: now
         },
         {
           title: 'So sánh hơn và So sánh nhất',
           description: 'So sánh giữa các đối tượng.',
-          formula: 'adj-er/more adj, the adj-est/the most adj',
-          signs: 'than, the, ...est, more',
+          formula: 'adj-er / more adj, the adj-est / the most adj',
+          signs: ['than', 'the', 'of all', 'in the world'],
           structure: 'Ngắn: adj + er + than / the + adj + est\nDài: more + adj + than / the most + adj',
           examples: ['He is taller than me.', 'She is the most beautiful girl in the class.'],
+          quiz: {
+            question: 'This task is _____ (difficult) than that one.',
+            options: ['difficult', 'difficulter', 'more difficult', 'the most difficult'],
+            correct: 'more difficult'
+          },
+          createdAt: now
+        },
+        {
+          title: 'Thì Quá Khứ Đơn (Past Simple)',
+          description: 'Hành động đã kết thúc trong quá khứ.',
+          formula: 'S + V2/ed',
+          signs: ['yesterday', 'last week', 'ago', 'in 1990'],
+          structure: 'Khẳng định: S + V2/ed\nPhủ định: S + did + not + V\nNghi vấn: Did + S + V?',
+          examples: ['I visited my grandmother yesterday.', 'We went to the beach last summer.'],
+          quiz: {
+            question: 'He _____ (buy) this car 2 years ago.',
+            options: ['buy', 'buys', 'bought', 'buying'],
+            correct: 'bought'
+          },
+          createdAt: now
+        },
+        {
+          title: 'Thì Quá Khứ Tiếp Diễn',
+          description: 'Hành động đang xảy ra tại một thời điểm trong quá khứ.',
+          formula: 'S + was/were + V-ing',
+          signs: ['at that time', 'while', 'when', 'at 8 PM yesterday'],
+          structure: 'Sử dụng while cho 2 hành động song song, when cho hành động xen vào.',
+          examples: ['I was watching TV when he came.', 'While she was cooking, I was reading.'],
+          quiz: {
+            question: 'What _____ you doing at 9 PM last night?',
+            options: ['are', 'was', 'were', 'did'],
+            correct: 'were'
+          },
+          createdAt: now
+        },
+        {
+          title: 'Thì Hiện Tại Hoàn Thành',
+          description: 'Hành động bắt đầu ở quá khứ và còn liên quan đến hiện tại.',
+          formula: 'S + have/has + V3/ed',
+          signs: ['since', 'for', 'already', 'yet', 'just', 'ever', 'never'],
+          structure: 'Nhấn mạnh kết quả của hành động.',
+          examples: ['I have lived here for 10 years.', 'We have already finished the project.'],
+          quiz: {
+            question: 'She _____ (not/see) him since last week.',
+            options: ['doesn\'t see', 'didn\'t see', 'hasn\'t seen', 'haven\'t seen'],
+            correct: 'hasn\'t seen'
+          },
+          createdAt: now
+        },
+        {
+          title: 'Thì Tương Lai Đơn (Future Simple)',
+          description: 'Quyết định tức thì hoặc dự đoán không căn cứ.',
+          formula: 'S + will + V',
+          signs: ['tomorrow', 'next week', 'soon', 'probably', 'I think'],
+          structure: 'Dùng cho lời hứa, lời mời hoặc dự đoán tương lai.',
+          examples: ['I think it will rain tomorrow.', 'I will help you with your homework.'],
+          quiz: {
+            question: 'I promise I _____ (call) you tonight.',
+            options: ['call', 'will call', 'called', 'am calling'],
+            correct: 'will call'
+          },
+          createdAt: now
+        },
+        {
+          title: 'Cấu trúc với "Suggest"',
+          description: 'Đưa ra lời đề nghị, khuyên bảo.',
+          formula: 'Suggest + V-ing hoặc Suggest + (that) + S + should + V',
+          signs: ['suggest', 'recommend', 'advise'],
+          structure: 'Lưu ý: Sau suggest that luôn dùng V nguyên mẫu (hoặc should V).',
+          examples: ['I suggest going to the cinema.', 'He suggested that she should take a rest.'],
+          quiz: {
+            question: 'My teacher suggests _____ (study) harder.',
+            options: ['study', 'to study', 'studying', 'studies'],
+            correct: 'studying'
+          },
+          createdAt: now
+        },
+        {
+          title: 'Cấu trúc "So... that" và "Such... that"',
+          description: 'Dùng để nhấn mạnh nguyên nhân - kết quả (Quá ... đến nỗi mà).',
+          formula: 'So + adj/adv + that / Such + (a/an) + adj + N + that',
+          signs: ['so', 'such', 'too', 'enough'],
+          structure: 'So đi với tính từ/trạng từ. Such đi với cụm danh từ.',
+          examples: ['The tea is so hot that I can\'t drink it.', 'It was such a cold day that we stayed home.'],
+          quiz: {
+            question: 'It is _____ a difficult problem that no one can solve it.',
+            options: ['so', 'such', 'very', 'too'],
+            correct: 'such'
+          },
           createdAt: now
         }
       ];
@@ -193,6 +307,22 @@ export function Admin() {
       }
       if (payload.options && typeof payload.options === 'string') {
         payload.options = payload.options.split(',').map((s: string) => s.trim());
+      }
+      if (payload.signs && typeof payload.signs === 'string') {
+        payload.signs = payload.signs.split(',').map((s: string) => s.trim());
+      }
+
+      // Handle nested quiz object for grammar
+      if (contentSubTab === 'grammar' && payload.quizQuestion) {
+        payload.quiz = {
+          question: payload.quizQuestion,
+          options: payload.quizOptions ? payload.quizOptions.split(',').map((s: string) => s.trim()) : [],
+          correct: payload.quizCorrect
+        };
+        // Remove flattened fields to keep DB clean
+        delete payload.quizQuestion;
+        delete payload.quizOptions;
+        delete payload.quizCorrect;
       }
 
       if (editingContent?.id) {
@@ -692,6 +822,24 @@ export function Admin() {
                       <div className="space-y-2">
                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Cấu trúc (mô tả dài)</label>
                          <textarea name="structure" defaultValue={editingContent.structure} required className="w-full h-24 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 font-bold" />
+                      </div>
+                      
+                      <div className="pt-4 border-t border-slate-100 mt-4">
+                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4">Bài kiểm tra nhanh (Tùy chọn)</h4>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Câu hỏi Quiz</label>
+                             <input name="quizQuestion" defaultValue={editingContent.quiz?.question} className="w-full h-12 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 font-bold" />
+                          </div>
+                          <div className="space-y-2">
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Các lựa chọn (Phân cách bằng dấu phẩy)</label>
+                             <input name="quizOptions" defaultValue={editingContent.quiz?.options?.join(', ')} className="w-full h-12 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 font-bold" />
+                          </div>
+                          <div className="space-y-2">
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Đáp án đúng</label>
+                             <input name="quizCorrect" defaultValue={editingContent.quiz?.correct} className="w-full h-12 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 font-bold" />
+                          </div>
+                        </div>
                       </div>
                     </>
                   )}
