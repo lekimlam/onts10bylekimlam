@@ -58,53 +58,114 @@ export function Admin() {
   };
 
   const seedData = async () => {
-    if (!window.confirm("Bồ có muốn nạp dữ liệu mẫu cho tất cả các mục không? Dữ liệu hiện tại sẽ không bị ảnh hưởng.")) return;
+    if (!window.confirm("Bồ có muốn nạp bộ dữ liệu đầy đủ cho chương trình lớp 10 không? Dữ liệu hiện tại sẽ không bị ảnh hưởng.")) return;
     setUpdating(true);
     try {
-      // Grammar Seed
+      const now = new Date().toISOString();
+      
+      // Grammar Seeds
       const grammarRef = collection(db, 'grammar');
-      await addDoc(grammarRef, {
-        title: 'Thì Hiện Tại Đơn',
-        description: 'Diễn tả một hành động lặp đi lặp lại hoặc một chân lý.',
-        formula: 'S + V(s/es)',
-        signs: 'always, usually, often, every day...',
-        structure: 'Khẳng định: S + V(s/es)\nPhủ định: S + do/does + not + V\nNghi vấn: Do/Does + S + V?',
-        examples: 'I usually get up at 6 AM., The sun rises in the East.',
-        createdAt: new Date().toISOString()
-      });
+      const grammarItems = [
+        {
+          title: 'Thì Hiện Tại Đơn (Present Simple)',
+          description: 'Diễn tả thói quen, sự thật hiển nhiên.',
+          formula: 'S + V(s/es)',
+          signs: 'always, usually, often, every day...',
+          structure: 'Khẳng định: S + V(s/es)\nPhủ định: S + do/does + not + V\nNghi vấn: Do/Does + S + V?',
+          examples: ['I usually get up at 6 AM.', 'The sun rises in the East.'],
+          createdAt: now
+        },
+        {
+          title: 'Thì Hiện Tại Tiếp Diễn',
+          description: 'Đang xảy ra tại thời điểm nói.',
+          formula: 'S + am/is/are + V-ing',
+          signs: 'now, at the moment, look!, listen!',
+          structure: 'Khẳng định: S + am/is/are + V-ing\nPhủ định: S + am/is/are + not + V-ing\nNghi vấn: Am/Is/Are + S + V-ing?',
+          examples: ['She is reading a book now.', 'They are playing soccer.'],
+          createdAt: now
+        },
+        {
+          title: 'Câu Bị Động (Passive Voice)',
+          description: 'Nhấn mạnh vào hành động thay vì người thực hiện.',
+          formula: 'S + be + V3/ed',
+          signs: 'by + agent',
+          structure: 'Hiện tại đơn: S + am/is/are + V3/ed\nQuá khứ đơn: S + was/were + V3/ed',
+          examples: ['This cake was made by my mom.', 'English is spoken all over the world.'],
+          createdAt: now
+        },
+        {
+          title: 'Câu Điều Kiện Loại 1',
+          description: 'Sự việc có thể xảy ra ở hiện tại hoặc tương lai.',
+          formula: 'If + S + V(s/es), S + will + V',
+          signs: 'If, unless',
+          structure: 'Mệnh đề If: Hiện tại đơn\nMệnh đề chính: Tương lai đơn (will + V)',
+          examples: ['If it rains, I will stay at home.', 'If you study hard, you will pass the exam.'],
+          createdAt: now
+        },
+        {
+          title: 'Mệnh đề quan hệ (Relative Clauses)',
+          description: 'Dùng who, whom, whose, which, that để nối câu.',
+          formula: 'Noun + Relative Pronoun + ...',
+          signs: 'who, whom, whose, which, that',
+          structure: 'Who: thay cho người (chủ ngữ)\nWhom: thay cho người (tân ngữ)\nWhose: chỉ sở hữu\nWhich: thay cho vật',
+          examples: ['The man who is standing there is my teacher.', 'The book which I bought yesterday is interesting.'],
+          createdAt: now
+        },
+        {
+          title: 'So sánh hơn và So sánh nhất',
+          description: 'So sánh giữa các đối tượng.',
+          formula: 'adj-er/more adj, the adj-est/the most adj',
+          signs: 'than, the, ...est, more',
+          structure: 'Ngắn: adj + er + than / the + adj + est\nDài: more + adj + than / the most + adj',
+          examples: ['He is taller than me.', 'She is the most beautiful girl in the class.'],
+          createdAt: now
+        }
+      ];
+      for (const item of grammarItems) await addDoc(grammarRef, item);
 
-      // Vocabulary Seed
+      // Vocabulary Seeds
       const vocabRef = collection(db, 'flashcards');
-      await addDoc(vocabRef, {
-        word: 'Environment',
-        meaning: 'Môi trường',
-        pronunciation: '/ɪnˈvaɪrənmənt/',
-        example: 'We must protect the environment.',
-        topic: 'Nature',
-        createdAt: new Date().toISOString()
-      });
+      const vocabItems = [
+        { word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.', topic: 'Nature', createdAt: now },
+        { word: 'Pollution', meaning: 'Sự ô nhiễm', pronunciation: '/pəˈluːʃn/', example: 'Air pollution is a big problem.', topic: 'Nature', createdAt: now },
+        { word: 'Benefit', meaning: 'Lợi ích', pronunciation: '/ˈbenɪfɪt/', example: 'Reading books has many benefits.', topic: 'Education', createdAt: now },
+        { word: 'Volunteer', meaning: 'Tình nguyện viên', pronunciation: '/ˌvɒlənˈtɪə(r)/', example: 'They are working as volunteers.', topic: 'Community', createdAt: now },
+        { word: 'Technology', meaning: 'Công nghệ', pronunciation: '/tekˈnɒlədʒi/', example: 'Technology changes our lives.', topic: 'Science', createdAt: now },
+        { word: 'Global Warming', meaning: 'Nóng lên toàn cầu', pronunciation: '/ˌɡləʊbl ˈwɔːmɪŋ/', example: 'Global warming is a serious threat.', topic: 'Nature', createdAt: now },
+        { word: 'Renewable', meaning: 'Có thể tái tạo', pronunciation: '/rɪˈnjuːəbl/', example: 'Solar energy is a renewable source.', topic: 'Nature', createdAt: now },
+        { word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'We need sustainable development.', topic: 'Science', createdAt: now },
+        { word: 'Biodiversity', meaning: 'Đa dạng sinh học', pronunciation: '/ˌbaɪəʊdaɪˈvɜːsəti/', example: 'Protecting biodiversity is vital.', topic: 'Nature', createdAt: now },
+        { word: 'Conservation', meaning: 'Sự bảo tồn', pronunciation: '/ˌkɒnsəˈveɪʃn/', example: 'The conservation of nature is a duty.', topic: 'Nature', createdAt: now },
+        { word: 'Adventure', meaning: 'Cuộc phiêu lưu', pronunciation: '/ədˈventʃə(r)/', example: 'The book is about a great adventure.', topic: 'Book', createdAt: now }
+      ];
+      for (const item of vocabItems) await addDoc(vocabRef, item);
 
-      // Practice Seed
+      // Practice Seeds
       const practiceRef = collection(db, 'questions');
-      await addDoc(practiceRef, {
-        type: 'multiple_choice',
-        content: 'She (go) ___ to school every day.',
-        options: 'go, goes, going, gone',
-        correctAnswer: 'goes',
-        difficulty: 'easy',
-        createdAt: new Date().toISOString()
-      });
+      const practiceItems = [
+        { type: 'multiple_choice', content: 'She (go) ___ to school every day.', options: ['go', 'goes', 'going', 'gone'], correctAnswer: 'goes', difficulty: 'easy', createdAt: now },
+        { type: 'multiple_choice', content: 'Listen! The bird (sing) ___ on the tree.', options: ['sing', 'sings', 'is singing', 'was singing'], correctAnswer: 'is singing', difficulty: 'easy', createdAt: now },
+        { type: 'multiple_choice', content: 'If I (have) ___ money, I will buy that car.', options: ['have', 'has', 'had', 'having'], correctAnswer: 'have', difficulty: 'medium', createdAt: now },
+        { type: 'multiple_choice', content: 'The floor (clean) ___ by Mary yesterday.', options: ['clean', 'cleans', 'was cleaned', 'is cleaned'], correctAnswer: 'was cleaned', difficulty: 'medium', createdAt: now },
+        { type: 'multiple_choice', content: 'We (not/see) ___ him since last week.', options: ['don\'t see', 'didn\'t see', 'haven\'t seen', 'hasn\'t seen'], correctAnswer: 'haven\'t seen', difficulty: 'medium', createdAt: now },
+        { type: 'multiple_choice', content: 'He is the man ___ son won the prize.', options: ['who', 'whom', 'whose', 'which'], correctAnswer: 'whose', difficulty: 'hard', createdAt: now },
+        { type: 'multiple_choice', content: 'You should avoid ___ too much fast food.', options: ['eat', 'to eat', 'eating', 'ate'], correctAnswer: 'eating', difficulty: 'medium', createdAt: now },
+        { type: 'multiple_choice', content: 'I wish I ___ a doctor in the future.', options: ['am', 'was', 'were', 'will be'], correctAnswer: 'were', difficulty: 'medium', createdAt: now },
+        { type: 'fill_blank', content: 'They usually ___ (play) football on Sundays.', correctAnswer: 'play', difficulty: 'easy', createdAt: now },
+        { type: 'fill_blank', content: 'Yesterday, I ___ (buy) a new computer.', correctAnswer: 'bought', difficulty: 'easy', createdAt: now }
+      ];
+      for (const item of practiceItems) await addDoc(practiceRef, item);
 
-      // Exam Seed
+      // Exam Seeds
       const examRef = collection(db, 'exams');
-      await addDoc(examRef, {
-        title: 'Đề thi thử lớp 10 - Đề số 1',
-        durationMinutes: 60,
-        description: 'Đề thi bám sát cấu trúc tuyển sinh.',
-        createdAt: new Date().toISOString()
-      });
+      const examItems = [
+        { title: 'Đề thi giữa kỳ I - Tiếng Anh 10', durationMinutes: 45, description: 'Kiểm tra Unit 1, 2, 3.', createdAt: now },
+        { title: 'Đề thi học kỳ I - Tiếng Anh 10', durationMinutes: 60, description: 'Tổng hợp kiến thức học kỳ 1.', createdAt: now },
+        { title: 'Đề thi Tuyển sinh lớp 10 - Đề mã 01', durationMinutes: 60, description: 'Cấu trúc thi chính thức.', createdAt: now }
+      ];
+      for (const item of examItems) await addDoc(examRef, item);
 
-      toast.success("Đã nạp dữ liệu mẫu thành công!");
+      toast.success("Đã nạp toàn bộ dữ liệu mẫu lớp 10 thành công!");
       fetchContent();
     } catch (err: any) {
       toast.error("Lỗi khi nạp dữ liệu: " + err.message);
