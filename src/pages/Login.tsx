@@ -148,76 +148,76 @@ export function Login() {
         initial={{ opacity: 0, scale: 0.9 }} 
         animate={{ opacity: 1, scale: 1 }} 
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-md relative z-10 p-1"
+        className="w-[92%] max-w-md relative z-10 p-0.5 md:p-1"
       >
-        <div className="led-border bg-slate-900/80 backdrop-blur-xl animate-neon">
-          <Card className="led-content p-8 border-none shadow-none bg-transparent text-white">
-            <CardHeader className="text-center pb-6 px-0 pt-0">
+        <div className="led-border bg-slate-900/80 backdrop-blur-xl animate-neon rounded-[2.5rem]">
+          <Card className="led-content p-6 md:p-8 border-none shadow-none bg-transparent text-white">
+            <CardHeader className="text-center pb-4 md:pb-6 px-0 pt-0">
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <CardTitle className="text-4xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+                <CardTitle className="text-2xl md:text-4xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
                   {isAdminPath ? "Quản trị viên" : (isLogin ? "Đăng nhập" : "Tạo tài khoản")}
                 </CardTitle>
-                <p className="text-sm font-bold text-indigo-300/60 mt-3 uppercase tracking-[0.2em]">
+                <p className="text-[10px] md:text-sm font-bold text-indigo-300/60 mt-2 md:mt-3 uppercase tracking-[0.2em]">
                   {isAdminPath 
-                    ? "System Control Portal" 
-                    : (isLogin ? "Access your learning journey" : "Join the English 10 elite")
+                    ? "Cổng điều khiển hệ thống" 
+                    : (isLogin ? "Tiếp tục hành trình học tập" : "Gia nhập thế hệ học tập mới")
                   }
                 </p>
               </motion.div>
             </CardHeader>
             <CardContent className="px-0 pb-0">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2 group">
-                  <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] px-1 group-focus-within:text-indigo-300 transition-colors">Tên đăng nhập / Email</label>
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                <div className="space-y-1.5 md:space-y-2 group">
+                  <label className="text-[9px] md:text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] px-1 group-focus-within:text-indigo-300 transition-colors">Tên đăng nhập / Email</label>
                   <Input 
                     placeholder="VD: lekimlam" 
                     value={username} 
                     onChange={(e) => setUsername(e.target.value)}
-                    className="bg-white/5 border-white/10 focus:border-indigo-500 h-14 rounded-2xl text-white placeholder:text-white/20 focus:bg-white/10 transition-all font-bold"
+                    className="bg-white/5 border-white/10 focus:border-indigo-500 h-11 md:h-14 rounded-xl md:rounded-2xl text-white placeholder:text-white/20 focus:bg-white/10 transition-all font-bold text-sm md:text-base"
                     disabled={loading}
                   />
                 </div>
-                <div className="space-y-2 group">
-                  <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] px-1 group-focus-within:text-indigo-300 transition-colors">Mật mã bảo mật</label>
+                <div className="space-y-1.5 md:space-y-2 group">
+                  <label className="text-[9px] md:text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] px-1 group-focus-within:text-indigo-300 transition-colors">Mật mã bảo mật</label>
                   <Input 
                     type="password" 
                     placeholder="••••••••" 
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-white/5 border-white/10 focus:border-indigo-500 h-14 rounded-2xl text-white placeholder:text-white/20 focus:bg-white/10 transition-all font-bold"
+                    className="bg-white/5 border-white/10 focus:border-indigo-500 h-11 md:h-14 rounded-xl md:rounded-2xl text-white placeholder:text-white/20 focus:bg-white/10 transition-all font-bold text-sm md:text-base"
                     disabled={loading}
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full h-14 text-lg rounded-2xl mt-8 font-black bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] transform active:scale-[0.98] transition-all border-none" 
+                  className="w-full h-11 md:h-14 text-base md:text-lg rounded-xl md:rounded-2xl mt-4 md:mt-8 font-black bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] transform active:scale-[0.98] transition-all border-none uppercase tracking-widest" 
                   disabled={loading}
                 >
-                  {loading ? "AUTHENTICATING..." : (isLogin ? "ENTER PORTAL" : "CREATE IDENTITY")}
+                  {loading ? "ĐANG XÁC THỰC..." : (isLogin ? "BẮT ĐẦU NGAY" : "TẠO TÀI KHOẢN")}
                 </Button>
               </form>
 
-              <div className="relative my-10">
+              <div className="relative my-6 md:my-10">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-white/10"></span>
                 </div>
-                <div className="relative flex justify-center text-[10px] uppercase font-black tracking-[0.3em]">
-                  <span className="bg-[#0f172a] px-4 text-white/30">Protocol</span>
+                <div className="relative flex justify-center text-[9px] md:text-[10px] uppercase font-black tracking-[0.3em]">
+                  <span className="bg-[#0f172a] px-3 md:px-4 text-white/30">Phương thức</span>
                 </div>
               </div>
 
               <Button 
                 type="button" 
                 variant="outline" 
-                className="w-full h-14 text-sm rounded-2xl font-bold flex items-center justify-center gap-3 border-2 border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all shadow-lg"
+                className="w-full h-11 md:h-14 text-xs md:text-sm rounded-xl md:rounded-2xl font-bold flex items-center justify-center gap-2 md:gap-3 border-2 border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all shadow-lg"
                 onClick={handleGoogleLogin}
                 disabled={loading}
               >
-                <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                     fill="#4285F4"
@@ -235,18 +235,18 @@ export function Login() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sync with Neural-Link
+                Liên kết Google
               </Button>
               
               {!isAdminPath && (
-                <div className="mt-10 text-center text-[11px] font-black uppercase tracking-widest text-indigo-400/60">
-                  {isLogin ? "Unauthorized? " : "Already linked? "}
+                <div className="mt-6 md:mt-10 text-center text-[10px] md:text-[11px] font-black uppercase tracking-widest text-indigo-400/60">
+                  {isLogin ? "Chưa có tài khoản? " : "Đã có tài khoản? "}
                   <button 
                     onClick={() => setIsLogin(!isLogin)} 
                     className="text-indigo-400 hover:text-white transition-colors underline decoration-2 underline-offset-4"
                     disabled={loading}
                   >
-                    {isLogin ? "Generate ID" : "Execute Login"}
+                    {isLogin ? "Tạo ngay" : "Đăng nhập ngay"}
                   </button>
                 </div>
               )}
@@ -255,13 +255,13 @@ export function Login() {
                 <div className="mt-10 p-5 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 text-[11px] text-indigo-300 font-bold uppercase tracking-widest flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></span>
-                    Admin override active
+                    Đang ghi đè hệ thống
                   </div>
                   <div className="flex justify-between items-center bg-black/20 p-2 rounded-lg border border-white/5">
-                    <span className="text-white/40">ID:</span> lekimlam
+                    <span className="text-white/40">USER:</span> lekimlam
                   </div>
                   <div className="flex justify-between items-center bg-black/20 p-2 rounded-lg border border-white/5">
-                    <span className="text-white/40">KEY:</span> 16052011
+                    <span className="text-white/40">PASS:</span> 16052011
                   </div>
                 </div>
               )}

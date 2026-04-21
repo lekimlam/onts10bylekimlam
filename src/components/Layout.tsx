@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router';
 import { useAuth } from '@/src/lib/auth-context';
-import { BookOpen, Home, Layers, PlaySquare, Trophy, User, LogOut, Menu, X, Settings, Zap, MessageSquare } from 'lucide-react';
+import { BookOpen, Home, Layers, PlaySquare, Trophy, User, LogOut, Menu, X, Settings, Zap, MessageSquare, Laptop, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from './ui/button';
 
@@ -86,7 +86,7 @@ export function Layout() {
             const isActive = location.pathname === item.path;
             return (
               <Link
-                key={item.path}
+                key={item.name}
                 to={item.path}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer font-medium transition-all ${
                   isActive 
@@ -209,7 +209,7 @@ export function Layout() {
                     const isActive = location.pathname === item.path;
                     return (
                       <Link
-                        key={item.path}
+                        key={item.name}
                         to={item.path}
                         onClick={closeMenu}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer font-medium transition-all ${
@@ -257,6 +257,18 @@ export function Layout() {
               exit={{ opacity: 0, scale: 0.5, y: 20 }}
               className="flex flex-col gap-3 mb-2"
             >
+              <button 
+                title="Giao diện Máy tính"
+                className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-blue-600 border-2 border-blue-50 hover:bg-blue-50 transition-all group"
+              >
+                <Laptop className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+              <button 
+                title="Giao diện Điện thoại"
+                className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-emerald-600 border-2 border-emerald-50 hover:bg-emerald-50 transition-all group"
+              >
+                <Smartphone className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
               <button 
                 title="Hỗ trợ"
                 className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-indigo-600 border-2 border-indigo-50 hover:bg-indigo-50 transition-all group"

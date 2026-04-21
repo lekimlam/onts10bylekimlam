@@ -30,7 +30,7 @@ export function Home() {
               <p className="text-indigo-100 text-base md:text-lg mb-8 max-w-md">
                 Trải nghiệm học tập hiện đại, cá nhân hóa với hệ thống bài tập phong phú, flashcard tương tác và các bài thi thử như thật.
               </p>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 mb-8">
                 <Link to="/practice">
                   <Button size="lg" className="h-14 px-8 text-lg rounded-2xl bg-white text-indigo-600 shadow-[0_4px_0_#4f46e5] hover:-translate-y-[2px] active:translate-y-[2px] active:shadow-[0_2px_0_#4f46e5] border-0 transition-none">
                     BẮT ĐẦU HỌC NAY
@@ -41,6 +41,17 @@ export function Home() {
                      FLASHCARD
                    </Button>
                 </Link>
+              </div>
+
+              <div className="flex items-center gap-6 pt-4 border-t border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">💻</div>
+                  <span className="text-xs font-bold text-indigo-100 uppercase tracking-widest">Tối ưu cho Máy tính</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">📱</div>
+                  <span className="text-xs font-bold text-indigo-100 uppercase tracking-widest">Tương thích Điện thoại</span>
+                </div>
               </div>
             </div>
             <div className="absolute -right-8 -bottom-16 opacity-20 text-[200px] font-black pointer-events-none">A+</div>
