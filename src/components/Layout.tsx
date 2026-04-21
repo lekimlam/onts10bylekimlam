@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router';
 import { useAuth } from '@/src/lib/auth-context';
-import { BookOpen, Home, Layers, PlaySquare, Trophy, User, LogOut, Menu, X, Settings } from 'lucide-react';
+import { BookOpen, Home, Layers, PlaySquare, Trophy, User, LogOut, Menu, X, Settings, Zap, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from './ui/button';
 
@@ -9,6 +9,7 @@ export function Layout() {
   const { user, signOut, loading: authLoading } = useAuth();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isFabOpen, setIsFabOpen] = React.useState(false);
 
   const isLoginPage = location.pathname.startsWith('/login');
 
@@ -64,9 +65,13 @@ export function Layout() {
   const closeMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <div className="h-screen bg-[#F1F5F9] text-slate-900 font-sans overflow-hidden flex flex-col md:flex-row">
+    <div className="h-screen bg-[#F1F5F9] text-slate-900 font-sans overflow-hidden flex flex-col md:flex-row relative">
+      {/* Global Cyber Effects */}
+      <div className="absolute inset-0 cyber-grid pointer-events-none opacity-[0.4]"></div>
+      <div className="cyber-scanline pointer-events-none"></div>
+
       {/* Desktop Sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col p-6 space-y-8 z-10 shrink-0">
+      <aside className="w-64 bg-white/70 backdrop-blur-xl border-r border-slate-200 hidden md:flex flex-col p-6 space-y-8 z-20 shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-3 px-2">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
@@ -121,9 +126,9 @@ export function Layout() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
         {/* Desktop Header */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 hidden md:flex items-center justify-between z-10 shrink-0">
+        <header className="h-20 bg-white/40 backdrop-blur-md border-b border-slate-200 px-8 hidden md:flex items-center justify-between z-20 shrink-0">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
               <span className="text-2xl">🔥</span>
@@ -152,7 +157,7 @@ export function Layout() {
         </header>
 
         {/* Mobile Header */}
-        <header className="md:hidden h-16 bg-white border-b border-slate-200 px-4 flex items-center justify-between z-10 shrink-0">
+        <header className="md:hidden h-16 bg-white/60 backdrop-blur-lg border-b border-slate-200 px-4 flex items-center justify-between z-20 shrink-0">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-lg">
               E
@@ -190,7 +195,7 @@ export function Layout() {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed right-0 top-0 h-full w-64 bg-white shadow-2xl z-50 p-6 flex flex-col md:hidden"
+                className="fixed right-0 top-0 h-full w-64 bg-white/90 backdrop-blur-2xl shadow-2xl z-50 p-6 flex flex-col md:hidden border-l border-white/20"
               >
                 <div className="flex justify-between items-center mb-8">
                   <span className="font-bold text-lg">Menu</span>
@@ -237,9 +242,48 @@ export function Layout() {
         </AnimatePresence>
 
         {/* Main View Area */}
-        <main className="flex-1 overflow-y-auto w-full p-4 md:p-8">
+        <main className="flex-1 overflow-y-auto w-full p-4 md:p-8 relative">
           <Outlet />
         </main>
+      </div>
+
+      {/* Floating Action Button (FAB) */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        <AnimatePresence>
+          {isFabOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.5, y: 20 }}
+              className="flex flex-col gap-3 mb-2"
+            >
+              <button 
+                title="Hỗ trợ"
+                className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-indigo-600 border-2 border-indigo-50 hover:bg-indigo-50 transition-all group"
+              >
+                <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+              <button 
+                title="Cài đặt nhanh"
+                onClick={() => user?.role === 'admin' ? window.location.href = '/admin' : null}
+                className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-amber-600 border-2 border-amber-50 hover:bg-amber-50 transition-all group"
+              >
+                <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <button
+          onClick={() => setIsFabOpen(!isFabOpen)}
+          className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-[0_8px_30px_rgba(79,70,229,0.3)] transition-all transform active:scale-95 ${
+            isFabOpen 
+              ? 'bg-slate-900 text-white rotate-45' 
+              : 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white hover:shadow-[0_8px_30px_rgba(79,70,229,0.5)]'
+          }`}
+        >
+          {isFabOpen ? <X className="w-6 h-6" /> : <Zap className="w-6 h-6" />}
+        </button>
       </div>
     </div>
   );

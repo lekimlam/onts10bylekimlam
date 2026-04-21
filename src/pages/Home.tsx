@@ -7,15 +7,15 @@ import { Link } from 'react-router';
 
 export function Home() {
   const features = [
-    { icon: BookOpen, title: 'Ngữ pháp toàn diện', desc: 'Rèn luyện các chủ điểm ngữ pháp cốt lõi cho kỳ thi vào 10.', color: 'text-blue-500', bg: 'bg-blue-100' },
-    { icon: Sparkles, title: 'Flashcard thông minh', desc: 'Học từ vựng hiệu quả với bộ flashcard lật 3D và ôn tập cách quãng.', color: 'text-emerald-500', bg: 'bg-emerald-100' },
-    { icon: Target, title: 'Luyện tập đa dạng', desc: 'Nhiều dạng bài tập bám sát cấu trúc đề thi thực tế.', color: 'text-amber-500', bg: 'bg-amber-100' },
-    { icon: Trophy, title: 'Thi thử & Chấm điểm', desc: 'Trải nghiệm như thi thật, nhận kết quả và phân tích chi tiết.', color: 'text-purple-500', bg: 'bg-purple-100' },
+    { icon: BookOpen, title: 'Ngữ pháp toàn diện', desc: 'Rèn luyện các chủ điểm ngữ pháp cốt lõi cho kỳ thi vào 10.', color: 'text-blue-500', bg: 'bg-blue-50/50' },
+    { icon: Sparkles, title: 'Flashcard thông minh', desc: 'Học từ vựng hiệu quả với bộ flashcard lật 3D và ôn tập cách quãng.', color: 'text-emerald-500', bg: 'bg-emerald-50/50' },
+    { icon: Target, title: 'Luyện tập đa dạng', desc: 'Nhiều dạng bài tập bám sát cấu trúc đề thi thực tế.', color: 'text-amber-500', bg: 'bg-amber-50/50' },
+    { icon: Trophy, title: 'Thi thử & Chấm điểm', desc: 'Trải nghiệm như thi thật, nhận kết quả và phân tích chi tiết.', color: 'text-purple-500', bg: 'bg-purple-50/50' },
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[#F1F5F9] pb-8">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full text-left max-w-6xl mx-auto w-full pt-4 px-4 md:px-0">
+    <div className="flex flex-col h-full bg-transparent pb-8">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full text-left max-w-6xl mx-auto w-full pt-4 px-4 md:px-0 relative z-10">
         
         {/* Main Hero Card */}
         <div className="col-span-1 border-0 md:col-span-8 space-y-6">
@@ -55,16 +55,16 @@ export function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * idx }}
               >
-                <Card className="h-full bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:-translate-y-1 transition-transform">
+                <Card className="h-full bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white/50 shadow-sm hover:border-indigo-400/50 hover:-translate-y-1 transition-all group">
                   <CardContent className="p-0">
                     <div className="flex justify-between items-start mb-4">
-                      <div className={`p-3 rounded-2xl font-bold text-xl ${feature.bg} ${feature.color}`}>
+                      <div className={`p-3 rounded-2xl font-bold text-xl ${feature.bg} ${feature.color} border border-indigo-100 group-hover:scale-110 transition-transform`}>
                         <feature.icon className="w-6 h-6" />
                       </div>
-                      <span className="text-xs font-bold text-slate-400 uppercase">Tính năng</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Feature</span>
                     </div>
                     <h3 className="text-xl font-bold text-slate-800 mb-1">{feature.title}</h3>
-                    <p className="text-slate-500 text-sm">{feature.desc}</p>
+                    <p className="text-slate-500 text-sm leading-relaxed">{feature.desc}</p>
                   </CardContent>
                 </Card>
               </motion.div>
