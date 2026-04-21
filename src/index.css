@@ -14,4 +14,59 @@
   .backface-hidden {
     backface-visibility: hidden;
   }
+  
+  /* Neon glow animation */
+  @keyframes neon-pulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.5), 0 0 5px rgba(99, 102, 241, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.8), 0 0 10px rgba(99, 102, 241, 0.4); }
+  }
+
+  .animate-neon {
+    animation: neon-pulse 3s infinite;
+  }
+
+  @keyframes rotate-gradient {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .led-border {
+    position: relative;
+    padding: 2px;
+    overflow: hidden;
+    border-radius: 2rem; /* Matches 32px or similar large rounded corners */
+  }
+
+  .led-border::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0,
+      #6366f1 25%,
+      #a855f7 50%,
+      #ec4899 75%,
+      transparent 100%
+    );
+    animation: rotate-gradient 4s linear infinite;
+    z-index: 0;
+  }
+
+  .led-border::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: inherit;
+    border-radius: calc(2rem - 3px);
+    z-index: 1;
+  }
+
+  .led-content {
+    position: relative;
+    z-index: 2;
+  }
 }
