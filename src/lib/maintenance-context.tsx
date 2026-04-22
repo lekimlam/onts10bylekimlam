@@ -102,7 +102,7 @@ export const MaintenanceProvider = ({ children }: { children: React.ReactNode })
             transition={{ delay: 0.3 }}
             className="text-slate-400 font-medium text-lg mb-10 leading-relaxed"
           >
-            Xin lỗi bạn nhieeufs! LeeKimLaam đang được nâng cấp để mang lại trải nghiệm học tập tốt hơn. Chúng tôi sẽ quay lại trong giây lát!
+            Xin lỗi bạn về sự cố này! LeeKimLaam đang được nâng cấp để mang lại trải nghiệm học tập tốt hơn. Chúng tôi sẽ quay lại trong giây lát!
           </motion.p>
           
           {/* Pulsing Status Box */}
