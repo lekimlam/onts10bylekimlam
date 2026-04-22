@@ -174,7 +174,7 @@ export function Login() {
                 <div className="space-y-1.5 md:space-y-2 group">
                   <label className="text-[9px] md:text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] px-1 group-focus-within:text-indigo-300 transition-colors">Tên đăng nhập / Email</label>
                   <Input 
-                    placeholder="VD: lekimlam" 
+                    placeholder="••••••••" 
                     value={username} 
                     onChange={(e) => setUsername(e.target.value)}
                     className="bg-white/5 border-white/10 focus:border-indigo-500 h-11 md:h-14 rounded-xl md:rounded-2xl text-white placeholder:text-white/20 focus:bg-white/10 transition-all font-bold text-sm md:text-base"
