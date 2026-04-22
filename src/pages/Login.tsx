@@ -68,6 +68,16 @@ export function Login() {
     setLoading(true);
     const email = getEmail(username.trim().toLowerCase());
     
+    // Validate password for registration
+    if (!isLogin) {
+      const regex = /^[A-Z](?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{7,}$/;
+      if (!regex.test(password)) {
+        toast.error("Mật khẩu chưa đủ mạnh: Chữ đầu viết hoa, tối thiểu 8 ký tự, có số và ký tự đặc biệt (!@#...)");
+        setLoading(false);
+        return;
+      }
+    }
+    
     try {
       if (isLogin) {
         try {
@@ -191,6 +201,11 @@ export function Login() {
                     className="bg-white/5 border-white/10 focus:border-indigo-500 h-11 md:h-14 rounded-xl md:rounded-2xl text-white placeholder:text-white/20 focus:bg-white/10 transition-all font-bold text-sm md:text-base"
                     disabled={loading}
                   />
+                  {!isLogin && (
+                    <p className="text-[10px] text-white/40 font-medium px-1 mt-1">
+                      Yêu cầu: 8+ ký tự, chữ đầu viết hoa, có số và ký tự đặc biệt
+                    </p>
+                  )}
                 </div>
                 <Button 
                   type="submit" 

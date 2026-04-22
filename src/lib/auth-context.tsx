@@ -13,6 +13,8 @@ export interface AppUser {
   level: number;
   rank: 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond';
   streak: number;
+  usernameChangesCount?: number;
+  lastUsernameChangeAt?: string;
 }
 
 interface AuthContextType {
@@ -51,6 +53,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           level: data.level || 1,
           rank: data.rank || 'Bronze',
           streak: data.streak || 0,
+          usernameChangesCount: data.usernameChangesCount || 0,
+          lastUsernameChangeAt: data.lastUsernameChangeAt || null,
         });
       } else {
         // Create new user (should be handled in signup, but fallback here)

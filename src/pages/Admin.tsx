@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/src/lib/auth-context';
-import { Navigate } from 'react-router';
+import { Navigate, Link } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { Users, BookOpen, Settings, AlertTriangle, CheckCircle2, Clock, Trash2, Key, Mail, Shield, User as UserIcon, X, Search, Layers, PlaySquare, Trophy, Plus, HelpCircle, Database } from 'lucide-react';
@@ -360,18 +360,33 @@ export function Admin() {
     }
   };
 
-  const handleUpdatePassword = async () => {
-    if (!editingUser || !newPassword) return;
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+    
+    // Validate password complexity if a new one is provided
+    if (newPassword) {
+      const regex = /^[A-Z](?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{7,}$/;
+      if (!regex.test(newPassword)) {
+        toast.error("Mật khẩu chưa đủ mạnh: Chữ đầu viết hoa, tối thiểu 8 ký tự, có số và ký tự đặc biệt (!@#...)");
+        return;
+      }
+    }
+
     setUpdating(true);
     try {
       const userRef = doc(db, 'users', editingUser.id);
-      await setDoc(userRef, { password: newPassword }, { merge: true });
-      setUsersList(prev => prev.map(u => u.id === editingUser.id ? { ...u, password: newPassword } : u));
-      toast.success("Đã đổi mật khẩu thành công!");
+      const updateData: any = { username: editingUser.username };
+      if (newPassword) {
+        updateData.password = newPassword;
+      }
+
+      await setDoc(userRef, updateData, { merge: true });
+      setUsersList(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...updateData } : u));
+      toast.success("Đã cập nhật thông tin thành công!");
       setEditingUser(null);
       setNewPassword('');
     } catch (err: any) {
-      toast.error("Lỗi khi đổi mật khẩu: " + err.message);
+      toast.error("Lỗi khi cập nhật: " + err.message);
     } finally {
       setUpdating(false);
     }
@@ -589,6 +604,15 @@ export function Admin() {
                             </td>
                             <td className="px-6 py-4 text-right px-8">
                                <div className="flex justify-end gap-2">
+                                  <Link to={`/profile/${u.id}`}>
+                                     <Button 
+                                       variant="ghost" 
+                                       size="icon"
+                                       className="w-10 h-10 rounded-xl text-emerald-400 hover:text-emerald-600 hover:bg-slate-100"
+                                     >
+                                       <UserIcon size={18} />
+                                     </Button>
+                                  </Link>
                                   <Button 
                                     onClick={() => { setEditingUser(u); setNewPassword(u.password || ''); }}
                                     variant="ghost" 
@@ -956,10 +980,22 @@ export function Admin() {
                 </div>
                 <div className="space-y-6">
                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Tên tài khoản</label>
+                      <input 
+                        type="text" 
+                        value={editingUser.username} 
+                        onChange={(e) => setEditingUser({...editingUser, username: e.target.value})} 
+                        className="w-full h-14 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 font-bold" 
+                      />
+                   </div>
+                   <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Reset Mật Khẩu (Plain Text)</label>
                       <input type="text" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full h-14 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 font-bold" />
+                      <p className="text-[10px] text-slate-400 font-medium px-1">
+                         Yêu cầu: 8+ ký tự, chữ đầu viết hoa, có số và ký tự đặc biệt
+                      </p>
                    </div>
-                   <Button onClick={handleUpdatePassword} disabled={updating || !newPassword} className="w-full h-14 rounded-2xl font-black bg-indigo-600 text-white">
+                   <Button onClick={handleUpdateUser} disabled={updating} className="w-full h-14 rounded-2xl font-black bg-indigo-600 text-white">
                       {updating ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
                    </Button>
                 </div>

@@ -63,6 +63,7 @@ export function Layout() {
         { name: 'Game Xếp Chữ', path: '/wordgame', icon: Shuffle },
         { name: 'Luyện tập', path: '/practice', icon: PlaySquare },
         { name: 'Thi thử', path: '/exam', icon: Trophy },
+        { name: 'Hồ sơ', path: '/profile', icon: User },
       ];
 
   const closeMenu = () => setIsMobileMenuOpen(false);
@@ -142,7 +143,7 @@ export function Layout() {
               <span className="font-bold text-blue-500">{user ? user.xp : 0} XP</span>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <Link to="/profile" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
             {user ? (
               <>
                 <div className="text-right">
@@ -156,7 +157,7 @@ export function Layout() {
             ) : (
               <span className="text-sm font-bold text-slate-400">Khách</span>
             )}
-          </div>
+          </Link>
         </header>
 
         {/* Mobile Header */}

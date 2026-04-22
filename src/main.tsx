@@ -11,6 +11,7 @@ import { Practice } from './pages/Practice';
 import { Library } from './pages/Library';
 import { WordGame } from './pages/WordGame';
 import { Exam } from './pages/Exam';
+import { Profile } from './pages/Profile';
 import { Admin } from './pages/Admin';
 import { AuthProvider } from './lib/auth-context';
 import { MaintenanceProvider } from './lib/maintenance-context';
@@ -38,6 +39,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="library" element={<Library />} />
               <Route path="wordgame" element={<WordGame />} />
               <Route path="exam" element={<Exam />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="profile/:userId" element={<Profile />} />
               <Route path="admin" element={<Admin />} />
             </Route>
           </Routes>
