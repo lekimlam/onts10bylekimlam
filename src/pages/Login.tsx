@@ -60,7 +60,7 @@ export function Login() {
     } else {
       // Normal /login path: Block the admin account lekimlam
       if (username.toLowerCase() === 'lekimlam') {
-        toast.error("Tai khoan admin lekimlam khong the dang nhap o trang binh thuong");
+        toast.error("Tài khoản này của admin không thể đăng nhập vui lòng tạo tài khoản moiwss");
         return;
       }
     }
