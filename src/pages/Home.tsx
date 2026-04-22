@@ -1,11 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { BookOpen, Trophy, Sparkles, Target } from 'lucide-react';
+import { BookOpen, Trophy, Sparkles, Target, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { db } from '@/src/lib/firebase';
+import { useAuth } from '@/src/lib/auth-context';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const chartData = [
+  { day: 'T2', xp: 400 },
+  { day: 'T3', xp: 300 },
+  { day: 'T4', xp: 600 },
+  { day: 'T5', xp: 800 },
+  { day: 'T6', xp: 500 },
+  { day: 'T7', xp: 900 },
+  { day: 'CN', xp: 1200 },
+];
 
 export function Home() {
+  const { user } = useAuth();
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+
+  useEffect(() => {
+    const q = query(collection(db, 'users'), orderBy('xp', 'desc'), limit(5));
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const topUsers = snap.docs.map((doc, i) => ({
+        id: doc.id,
+        rank: i + 1,
+        ...doc.data()
+      }));
+      setLeaderboard(topUsers);
+    });
+    return () => unsubscribe();
+  }, []);
   const features = [
     { icon: BookOpen, title: 'Ngữ pháp toàn diện', desc: 'Rèn luyện các chủ điểm ngữ pháp cốt lõi cho kỳ thi vào 10.', color: 'text-blue-500', bg: 'bg-blue-50/50' },
     { icon: Sparkles, title: 'Flashcard thông minh', desc: 'Học từ vựng hiệu quả với bộ flashcard lật 3D và ôn tập cách quãng.', color: 'text-emerald-500', bg: 'bg-emerald-50/50' },
@@ -57,6 +86,57 @@ export function Home() {
             <div className="absolute -right-8 -bottom-16 opacity-20 text-[200px] font-black pointer-events-none">A+</div>
           </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full bg-white p-8 rounded-[40px] border border-slate-200 shadow-sm overflow-hidden"
+          >
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                  <TrendingUp className="w-6 h-6 text-indigo-600" /> THỐNG KÊ HỌC TẬP
+                </h3>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">XP tích lũy trong 7 ngày qua</p>
+              </div>
+              <div className="bg-indigo-50 px-4 py-2 rounded-2xl border border-indigo-100 flex items-center gap-2">
+                 <span className="text-xl">🔥</span>
+                 <span className="text-lg font-black text-indigo-600">7 Ngày liên tiếp</span>
+              </div>
+            </div>
+            <div className="h-[250px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis 
+                    dataKey="day" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
+                    dy={10}
+                  />
+                  <YAxis hide />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 800 }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="xp" 
+                    stroke="#6366f1" 
+                    strokeWidth={4}
+                    fillOpacity={1} 
+                    fill="url(#colorXp)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+
           {/* Features Grid below hero */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             {features.map((feature, idx) => (
@@ -85,43 +165,73 @@ export function Home() {
 
         {/* Sidebar/Ranking section on the right */}
         <div className="col-span-1 md:col-span-4 space-y-6 pb-20 md:pb-0">
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col min-h-[320px]">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
             <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
-              <span>🏆</span> MỤC TIÊU CỦA BẠN
+              <span>🎯</span> MỤC TIÊU HÀNG NGÀY
             </h3>
-            <div className="space-y-4 flex-1">
-              <div className="flex items-center gap-4 p-3 bg-indigo-50 border border-indigo-100 rounded-2xl">
-                <span className="font-black text-indigo-600 w-4">🎯</span>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-800">Hoàn thành Flashcard</p>
-                  <p className="text-[10px] text-indigo-600 font-bold">50 TỪ VỰNG MỚI</p>
+            <div className="space-y-4 mb-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-bold mb-1">
+                  <span className="text-slate-500 uppercase tracking-widest italic">Kinh nghiệm (XP)</span>
+                  <span className="text-indigo-600">350 / 500</span>
+                </div>
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                   <div className="h-full bg-indigo-500 rounded-full w-[70%]" />
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-3 bg-emerald-50 border border-emerald-100 rounded-2xl">
-                <span className="font-black text-emerald-600 w-4">💡</span>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-800">Ôn tập Ngữ Pháp</p>
-                  <p className="text-[10px] text-emerald-600 font-bold">THÌ HIỆN TẠI ĐƠN</p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-bold mb-1">
+                  <span className="text-slate-500 uppercase tracking-widest italic">Từ vựng mới</span>
+                  <span className="text-emerald-600">12 / 20</span>
+                </div>
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                   <div className="h-full bg-emerald-500 rounded-full w-[60%]" />
                 </div>
               </div>
             </div>
             <Link to="/vocabulary">
-              <Button className="w-full mt-4 font-bold text-sm bg-slate-800 text-white shadow-[0_4px_0_#0f172a] hover:bg-slate-900 transition-none active:translate-y-[2px] active:shadow-[0_2px_0_#0f172a] rounded-xl h-12">
+              <Button className="w-full font-black text-sm bg-indigo-600 text-white shadow-[0_4px_0_#4338ca] hover:bg-indigo-700 transition-none active:translate-y-[2px] active:shadow-[0_2px_0_#4338ca] rounded-2xl h-12">
                 TIẾP TỤC HỌC
               </Button>
             </Link>
           </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+              <span>🏆</span> BẢNG XẾP HẠNG
+            </h3>
+            <div className="space-y-4">
+              {leaderboard.length > 0 ? (
+                leaderboard.map((item, i) => (
+                  <div key={item.id} className={`flex items-center gap-3 p-3 rounded-2xl border border-slate-100 ${user?.uid === item.id ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-100' : 'bg-white'}`}>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black ${i === 0 ? 'bg-amber-50 text-amber-500' : i === 1 ? 'bg-slate-100 text-slate-400' : i === 2 ? 'bg-orange-50 text-orange-400' : 'bg-slate-50 text-slate-400'}`}>
+                      {i + 1}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-black text-slate-800 truncate max-w-[120px]">{item.displayName || 'Học viên ẩn danh'}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.xp?.toLocaleString() || 0} XP</p>
+                    </div>
+                    {i === 0 && <span className="text-xl">👑</span>}
+                    {user?.uid === item.id && <span className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">BẠN</span>}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-slate-400 font-bold italic text-sm">Đang tải bảng xếp hạng...</div>
+              )}
+            </div>
+          </div>
           
-          <div className="bg-indigo-900 p-6 rounded-3xl text-white shadow-xl relative overflow-hidden">
+          <div className="bg-slate-900 p-6 rounded-3xl text-white shadow-xl relative overflow-hidden group">
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-indigo-700/80 rounded-xl flex items-center justify-center text-xl backdrop-blur-sm">🤖</div>
-                <h4 className="font-bold">AI Gợi ý</h4>
+                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl backdrop-blur-sm border border-white/10">🤖</div>
+                <h4 className="font-black italic uppercase tracking-wider text-sm">Gợi ý từ AI</h4>
               </div>
-              <p className="text-sm text-indigo-200 leading-relaxed">
-                Hệ thống AI đề xuất bạn nên tập trung cải thiện <span className="text-white font-bold">kỹ năng ghi nhớ từ vựng</span> dựa trên kết quả gần đây của bạn!
+              <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                Bồ đang làm rất tốt phần <span className="text-white font-bold">Thì hiện tại đơn</span>. Hãy thử thách bản thân với <span className="text-white font-bold">Từ vựng Môi trường</span> để bứt phá điểm số nhé!
               </p>
             </div>
+            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:scale-110 transition-transform">✨</div>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router';
 import { useAuth } from '@/src/lib/auth-context';
-import { BookOpen, Home, Layers, PlaySquare, Trophy, User, LogOut, Menu, X, Settings, Zap, MessageSquare, Laptop, Smartphone } from 'lucide-react';
+import { BookOpen, Home, Layers, PlaySquare, Trophy, User, LogOut, Menu, X, Settings, Zap, MessageSquare, Laptop, Smartphone, Shuffle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from './ui/button';
 
@@ -57,8 +57,10 @@ export function Layout() {
       ]
     : [
         { name: 'Trang chủ', path: '/', icon: Home },
+        { name: 'Khóa học', path: '/library', icon: Layers },
         { name: 'Ngữ pháp', path: '/grammar', icon: BookOpen },
-        { name: 'Từ vựng (Flashcard)', path: '/vocabulary', icon: Layers },
+        { name: 'Từ vựng (Flashcard)', path: '/vocabulary', icon: Zap },
+        { name: 'Game Xếp Chữ', path: '/wordgame', icon: Shuffle },
         { name: 'Luyện tập', path: '/practice', icon: PlaySquare },
         { name: 'Thi thử', path: '/exam', icon: Trophy },
       ];

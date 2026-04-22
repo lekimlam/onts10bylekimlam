@@ -3,36 +3,57 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import { Volume2, ArrowRight, CheckCircle2, XCircle, Award, Loader2 } from 'lucide-react';
+import { Volume2, ArrowRight, CheckCircle2, XCircle, Award, Loader2, Sparkles, BrainCircuit } from 'lucide-react';
 import { useAuth } from '@/src/lib/auth-context';
-import { doc, updateDoc, increment, collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { doc, updateDoc, increment, collection, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import { db } from '@/src/lib/firebase';
 import { toast } from 'react-hot-toast';
-import { GoogleGenAI } from '@google/genai';
+import { calculateNextReview } from '@/src/lib/srs';
+import { isBefore } from 'date-fns';
+
+interface CardData {
+  id: string;
+  word: string;
+  meaning: string;
+  pronunciation: string;
+  example: string;
+  level: number;
+  nextReview: Date;
+  topic?: string;
+}
 
 export function Vocabulary() {
   const { user, refreshUser } = useAuth();
-  const [cards, setCards] = useState<any[]>([]);
+  const [cards, setCards] = useState<CardData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [userInput, setUserInput] = useState('');
   const [feedback, setFeedback] = useState<'pending' | 'correct' | 'incorrect'>('pending');
   const [checking, setChecking] = useState(false);
+  const [viewMode, setViewMode] = useState<'challenge' | 'list'>('challenge');
+  const [studyMode, setStudyMode] = useState<'en-vn' | 'vn-en'>('vn-en');
   const [loading, setLoading] = useState(true);
+  const [streak, setStreak] = useState(0);
+  const [sessionXp, setSessionXp] = useState(0);
 
   useEffect(() => {
     const fetchFlashcards = async () => {
       try {
         const q = query(collection(db, 'flashcards'), orderBy('createdAt', 'desc'));
         const snap = await getDocs(q);
-        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        let list = snap.docs.map(d => ({ 
+          id: d.id, 
+          ...d.data(),
+          nextReview: d.data().nextReview?.toDate() || new Date(0)
+        } as CardData));
+
         if (list.length > 0) {
-          setCards(list);
+          const dueCards = list.filter(c => isBefore(c.nextReview, new Date()) || !c.level);
+          setCards(dueCards.length > 0 ? dueCards : list);
         } else {
-          // Fallback to initial seed if empty
           setCards([
-            { id: '1', word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.' },
-            { id: '2', word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'Sustainable development is crucial.' }
+            { id: '1', word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.', level: 0, nextReview: new Date() },
+            { id: '2', word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'Sustainable development is crucial.', level: 0, nextReview: new Date() }
           ]);
         }
       } catch (err) {
@@ -44,6 +65,20 @@ export function Vocabulary() {
     fetchFlashcards();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsFlipped(!isFlipped);
+      }
+      if (e.code === 'Enter' && userInput.trim()) {
+        checkAnswer();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFlipped, userInput]);
+
   const currentCard = cards[currentIndex];
 
   const playAudio = (text: string) => {
@@ -51,15 +86,6 @@ export function Vocabulary() {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       window.speechSynthesis.speak(utterance);
-    } else {
-      toast.error('Trình duyệt của bạn không hỗ trợ đọc phát âm');
-    }
-  };
-
-  const handleFlip = () => {
-    if (!isFlipped && currentCard) {
-      setIsFlipped(true);
-      playAudio(currentCard.word);
     }
   };
 
@@ -67,40 +93,60 @@ export function Vocabulary() {
     if (!userInput.trim() || !currentCard) return;
     setChecking(true);
     
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      const prompt = `You are checking an English learner's answer. The English word is "${currentCard.word}" and its standard Vietnamese meaning is "${currentCard.meaning}".
-      The user typed: "${userInput}". 
-      Is the user's answer reasonably correct or close enough? Respond ONLY with "YES" or "NO".`;
-      
-      const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: prompt,
+    const target = studyMode === 'vn-en' ? currentCard.word : currentCard.meaning;
+    const isCorrect = userInput.toLowerCase().trim() === target.toLowerCase().trim();
+    
+    setFeedback(isCorrect ? 'correct' : 'incorrect');
+
+    if (isCorrect && user) {
+      const { nextReview, nextLevel } = calculateNextReview(currentCard.level || 0, true);
+      const cardRef = doc(db, 'flashcards', currentCard.id);
+      await updateDoc(cardRef, {
+        level: nextLevel,
+        nextReview: Timestamp.fromDate(nextReview),
+        lastReviewed: Timestamp.now()
       });
+
+      const xpEarned = 20;
+      setSessionXp(prev => prev + xpEarned);
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { xp: increment(xpEarned) });
+
+      setStreak(prev => prev + 1);
+      toast.success(`Chính xác! +${xpEarned} XP`);
+      refreshUser();
       
-      const result = response.text?.trim().toUpperCase();
-      const isCorrect = result?.includes('YES');
-
-      setFeedback(isCorrect ? 'correct' : 'incorrect');
-
-      if (isCorrect && user) {
-        // Award XP
-        const xpEarned = 10;
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, {
-          xp: increment(xpEarned)
-        });
-        toast.success(`+${xpEarned} XP! Làm tốt lắm!`);
-        refreshUser();
-      }
-    } catch (error) {
-      console.error(error);
-      // Fallback manual check
-      const isCorrect = userInput.toLowerCase().trim() === currentCard.meaning.toLowerCase().trim();
-      setFeedback(isCorrect ? 'correct' : 'incorrect');
-    } finally {
-      setChecking(false);
+      setTimeout(nextCard, 1000);
+    } else {
+      setStreak(0);
     }
+    setChecking(false);
+  };
+
+  const skipCard = () => {
+    setStreak(0);
+    nextCard();
+    toast.error('Đã bỏ qua câu này');
+  };
+
+  const masterCard = async () => {
+    if (!user || !currentCard) return;
+    const { nextReview, nextLevel } = calculateNextReview(currentCard.level || 0, true);
+    const cardRef = doc(db, 'flashcards', currentCard.id);
+    await updateDoc(cardRef, {
+      level: Math.max(nextLevel, 3), // Set to at least level 3 for mastery
+      nextReview: Timestamp.fromDate(nextReview),
+      lastReviewed: Timestamp.now()
+    });
+
+    const xpEarned = 30;
+    setSessionXp(prev => prev + xpEarned);
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, { xp: increment(xpEarned) });
+
+    toast.success('Đã đánh dấu thuộc! +30 XP');
+    refreshUser();
+    nextCard();
   };
 
   const nextCard = () => {
@@ -110,135 +156,150 @@ export function Vocabulary() {
     setCurrentIndex((prev) => (prev + 1) % cards.length);
   };
 
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!currentCard) {
-    return (
-      <div className="h-full flex items-center justify-center text-slate-500 font-bold">
-        Chưa có thẻ từ vựng nào được tạo.
-      </div>
-    );
-  }
+  if (loading) return <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  if (!currentCard) return <div className="h-full flex items-center justify-center">Chưa có dữ liệu.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto h-full pt-4 pb-20 md:pb-8 flex flex-col items-center justify-center px-4">
-      <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
-        <div>
-          <span className="bg-white px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest mb-4 inline-block text-slate-500 border border-slate-200">Flashcard Pro</span>
-          <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-2">Học từ vựng</h1>
-          <p className="text-slate-500 font-medium text-sm md:text-base">Lật thẻ, nghe phát âm và luyện nhớ nghĩa từ vựng với AI.</p>
-        </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col items-end self-end md:self-auto">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tiến độ</span>
-          <div className="text-xl md:text-2xl font-black text-blue-600 leading-none">{currentIndex + 1} <span className="text-slate-300 text-lg">/ {cards.length}</span></div>
-        </div>
-      </div>
+    <div className="max-w-xl mx-auto h-full pt-4 pb-20 md:pb-8 flex flex-col items-center px-4 relative font-sans">
+      <div className="fixed inset-0 cyber-grid opacity-20 pointer-events-none -z-10" />
 
-      <div className="relative h-[400px] md:h-[450px] w-full max-w-2xl perspective-1000 mb-8" onClick={handleFlip}>
-        <motion.div
-          className="w-full h-full relative preserve-3d cursor-pointer"
-          animate={{ rotateX: isFlipped ? 180 : 0 }}
-          transition={{ duration: 0.6, type: 'spring', stiffness: 200, damping: 20 }}
-        >
-          {/* Front */}
-          <Card className="absolute inset-0 w-full h-full backface-hidden flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 to-blue-600 border-0 shadow-2xl rounded-[32px] md:rounded-[40px] overflow-hidden p-6 text-center">
-            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tight z-10 break-words max-w-full">{currentCard.word}</h2>
-            <div className="absolute inset-x-0 bottom-10 flex justify-center z-10 px-4 text-center">
-              <span className="px-5 py-2 md:px-6 md:py-3 bg-white/20 backdrop-blur-md text-white rounded-full font-bold uppercase tracking-widest text-[10px] md:text-sm animate-pulse border border-white/30 shadow-lg whitespace-nowrap">
-                CHẠM ĐỂ LẬT THẺ
-              </span>
-            </div>
-            <div className="absolute -right-20 -bottom-20 text-[250px] font-black text-white/10 pointer-events-none drop-shadow-2xl">{currentCard.word.charAt(0)}</div>
-          </Card>
-
-          {/* Back */}
-          <Card className="absolute inset-0 w-full h-full backface-hidden flex flex-col overflow-hidden bg-white border-2 border-slate-200 rounded-[32px] md:rounded-[40px] shadow-2xl" style={{ transform: 'rotateX(180deg)' }}>
-            <div className="flex-1 flex justify-between p-6 md:p-8 flex-col relative w-full h-full">
-              <div className="absolute top-0 left-0 w-full h-28 md:h-32 bg-indigo-50 rounded-b-[32px] md:rounded-b-[40px] border-b border-indigo-100 flex items-center justify-between px-6 md:px-8">
-                  <div className="max-w-[70%]">
-                    <h2 className="text-2xl md:text-4xl font-black text-slate-800 mb-1 truncate">{currentCard.word}</h2>
-                    <p className="text-base md:text-lg text-indigo-600 font-mono font-bold tracking-tight">{currentCard.pronunciation}</p>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="rounded-2xl w-12 h-12 md:w-14 md:h-14 bg-white text-indigo-600 border border-indigo-100 shadow-[0_4px_0_#e0e7ff] hover:-translate-y-[2px] active:translate-y-[2px] active:shadow-[0_2px_0_#e0e7ff] transition-none"
-                    onClick={(e) => { e.stopPropagation(); playAudio(currentCard.word); }}
-                  >
-                    <Volume2 className="w-5 h-5 md:w-6 md:h-6" />
-                  </Button>
-              </div>
-            
-              <div className="mt-28 pt-6 md:mt-32 md:pt-8 flex-1 w-full space-y-4 md:space-y-6">
-                <div>
-                  <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 md:mb-3">Định nghĩa</p>
-                  <p className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">{currentCard.meaning}</p>
-                </div>
-                <div className="bg-slate-50 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-slate-100">
-                  <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Ví dụ</p>
-                  <p className="text-base md:text-lg text-slate-600 font-medium italic">"{currentCard.example}"</p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      </div>
-
-      <div className="w-full max-w-2xl px-4">
-        <AnimatePresence>
-          {isFlipped && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-200 relative overflow-hidden"
+      {/* Header Info */}
+      <div className="w-full bg-white rounded-[2rem] border-2 border-slate-900 p-4 mb-6 shadow-[0_8px_0_#1e293b]">
+        <div className="flex justify-between items-center mb-4">
+          <div className="bg-slate-100 rounded-full px-4 py-1.5 flex items-center gap-2 border border-slate-200">
+            <span className="text-xs font-black text-slate-500">Chế độ</span>
+            <button 
+              onClick={() => setStudyMode(studyMode === 'vn-en' ? 'en-vn' : 'vn-en')}
+              className="text-xs font-black text-indigo-600 bg-white px-3 py-1 rounded-full shadow-sm hover:scale-105 transition-transform"
             >
-              <h3 className="font-black mb-6 text-slate-800 flex items-center gap-3 text-lg relative z-10">
-                <span className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center border-2 border-amber-200">
-                  <Award className="w-5 h-5" />
+              {studyMode === 'vn-en' ? 'VN → EN' : 'EN → VN'}
+            </button>
+          </div>
+          <div className="flex gap-4">
+            <button onClick={() => window.location.reload()} className="text-xs font-black text-slate-400 hover:text-indigo-600">Chơi lại</button>
+            <button onClick={() => window.history.back()} className="text-xs font-black text-slate-400 hover:text-red-500">Thoát</button>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="bg-amber-100 px-4 py-2 rounded-2xl border-2 border-amber-200 text-amber-700 font-black text-sm whitespace-nowrap">
+            💰 ~{sessionXp} GAME
+          </div>
+          <div className="flex-1 flex items-center gap-3">
+            <span className="text-sm font-black text-slate-600 italic whitespace-nowrap">{currentIndex + 1} / {cards.length}</span>
+            <div className="h-3 flex-1 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+               <motion.div 
+                animate={{ width: `${((currentIndex + 1) / cards.length) * 100}%` }}
+                className="h-full bg-emerald-500" 
+               />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Flashcard */}
+      <div className="relative h-[480px] w-full mb-8 cursor-pointer group" onClick={() => setIsFlipped(!isFlipped)}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={isFlipped ? 'back' : 'front'}
+            initial={{ rotateY: isFlipped ? -90 : 90, opacity: 0 }}
+            animate={{ rotateY: 0, opacity: 1 }}
+            exit={{ rotateY: isFlipped ? 90 : -90, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`w-full h-full rounded-[3rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-2xl border-b-8
+              ${isFlipped ? 'bg-white border-indigo-200 text-slate-800' : 'bg-gradient-to-br from-cyan-400 to-indigo-500 border-indigo-600 text-white'}`}
+          >
+            {!isFlipped ? (
+              <>
+                <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80 mb-10">
+                  {studyMode === 'vn-en' ? 'NGHĨA TIẾNG VIỆT' : 'TỪ TIẾNG ANH'}
                 </span>
-                KIỂM TRA TRÍ NHỚ ĐỂ NHẬN 10 XP
-              </h3>
-              
-              {feedback === 'pending' ? (
-                <div className="flex flex-col sm:flex-row gap-4 relative z-10">
-                  <Input 
-                    placeholder="Nhập nghĩa tiếng Việt của từ..." 
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    className="flex-1 h-14 bg-slate-50 border-slate-200 font-medium text-lg rounded-2xl"
-                    onKeyDown={(e) => e.key === 'Enter' && checkAnswer()}
-                  />
-                  <Button onClick={checkAnswer} disabled={checking || !userInput.trim()} className="h-14 px-8 rounded-2xl font-black shadow-[0_4px_0_rgba(15,23,42,0.8)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(15,23,42,0.8)] transition-none bg-slate-800 text-white hover:bg-slate-900 border-0">
-                    {checking ? "ĐANG XỬ LÝ..." : "KIỂM TRA NGHĨA"}
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-6 relative z-10">
-                  <div className={`p-6 rounded-3xl flex items-start gap-4 border-2 ${feedback === 'correct' ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
-                    <div className={`mt-1 bg-white p-2 rounded-xl shadow-sm border ${feedback === 'correct' ? 'border-emerald-100 text-emerald-500' : 'border-red-100 text-red-500'}`}>
-                       {feedback === 'correct' ? <CheckCircle2 className="w-7 h-7" /> : <XCircle className="w-7 h-7" />}
-                    </div>
-                    <div>
-                      <p className={`text-xl font-black mb-1 ${feedback === 'correct' ? 'text-emerald-800' : 'text-red-800'}`}>
-                        {feedback === 'correct' ? 'CHÍNH XÁC! XUẤT SẮC LẮM.' : 'CHƯA CHÍNH XÁC.'}
-                      </p>
-                      {feedback === 'incorrect' && <p className="text-red-600 font-medium text-lg">Nghĩa đúng là: <span className="font-bold">{currentCard.meaning}</span></p>}
-                    </div>
+                <h2 className="text-5xl font-black mb-8 leading-tight drop-shadow-xl">
+                  {studyMode === 'vn-en' ? currentCard.meaning : currentCard.word}
+                </h2>
+                <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 max-w-[280px]">
+                  <div className="flex items-center justify-center gap-3 mb-2">
+                    <Volume2 className="w-5 h-5 opacity-60" />
+                    <p className="text-sm italic font-medium">"{currentCard.example}"</p>
                   </div>
-                  <Button onClick={nextCard} className="w-full h-16 text-xl rounded-2xl gap-3 font-black shadow-[0_4px_0_rgba(15,23,42,0.8)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(15,23,42,0.8)] transition-none bg-slate-800 text-white hover:bg-slate-900 border-0">
-                     TỪ TIẾP THEO <ArrowRight className="w-6 h-6" />
-                  </Button>
                 </div>
-              )}
-            </motion.div>
-          )}
+                <div className="mt-auto flex items-center gap-2 opacity-60 text-xs font-bold">
+                  <span>👆</span> Nhấn Space hoặc click để lật lại
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="text-xs font-black uppercase tracking-[0.2em] text-indigo-400 mb-10">KẾT QUẢ</span>
+                <h2 className="text-5xl font-black text-slate-800 mb-4">{currentCard.word}</h2>
+                <p className="text-2xl font-mono font-bold text-indigo-500 mb-6">{currentCard.pronunciation}</p>
+                <div className="bg-indigo-50 px-6 py-4 rounded-3xl border border-indigo-100">
+                  <p className="text-slate-600 font-bold text-lg">{currentCard.meaning}</p>
+                </div>
+                <div className="mt-auto flex items-center gap-2 text-indigo-400 text-xs font-bold">
+                  <span>🔄</span> Đang xem mặt sau của thẻ
+                </div>
+              </>
+            )}
+          </motion.div>
         </AnimatePresence>
+      </div>
+
+      {/* Input Section */}
+      <div className="w-full flex gap-3 mb-8">
+        <Input 
+          placeholder="Gõ đáp án..." 
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && checkAnswer()}
+          className="flex-1 h-16 rounded-[2rem] border-2 border-slate-200 bg-white px-6 font-bold text-lg shadow-sm focus:border-indigo-400 text-slate-700"
+        />
+        <Button 
+          onClick={checkAnswer}
+          className="h-16 px-8 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg shadow-[0_4px_0_#059669] active:translate-y-[2px] active:shadow-none transition-all"
+        >
+          Check
+        </Button>
+      </div>
+
+      {/* Footer Controls */}
+      <div className="w-full flex justify-between items-center px-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setCurrentIndex(prev => (prev - 1 + cards.length) % cards.length)}
+          className="rounded-full w-12 h-12 text-indigo-400 hover:bg-indigo-50"
+        >
+          <motion.div whileHover={{ x: -3 }}><ArrowRight className="w-6 h-6 rotate-180" /></motion.div>
+        </Button>
+
+        <div className="flex gap-4">
+          <Button 
+            onClick={() => playAudio(currentCard.word)}
+            className="w-14 h-14 rounded-full bg-emerald-500 text-white shadow-[0_4px_0_#059669] active:translate-y-[2px]"
+          >
+            <Volume2 className="w-6 h-6" />
+          </Button>
+          <Button 
+            onClick={skipCard}
+            className="h-14 px-8 rounded-2xl bg-orange-500 text-white font-black shadow-[0_4px_0_#c2410c] active:translate-y-[2px]"
+          >
+            <XCircle className="w-5 h-5 mr-2" /> Quên
+          </Button>
+          <Button 
+            onClick={masterCard}
+            className="h-14 px-8 rounded-2xl bg-emerald-500 text-white font-black shadow-[0_4px_0_#059669] active:translate-y-[2px]"
+          >
+            <CheckCircle2 className="w-5 h-5 mr-2" /> Thuộc
+          </Button>
+        </div>
+
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={nextCard}
+          className="rounded-full w-12 h-12 text-indigo-400 hover:bg-indigo-50"
+        >
+          <motion.div whileHover={{ x: 3 }}><ArrowRight className="w-6 h-6" /></motion.div>
+        </Button>
       </div>
     </div>
   );

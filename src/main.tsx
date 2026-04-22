@@ -8,6 +8,8 @@ import { Login } from './pages/Login';
 import { Vocabulary } from './pages/Vocabulary';
 import { Grammar } from './pages/Grammar';
 import { Practice } from './pages/Practice';
+import { Library } from './pages/Library';
+import { WordGame } from './pages/WordGame';
 import { Exam } from './pages/Exam';
 import { Admin } from './pages/Admin';
 import { AuthProvider } from './lib/auth-context';
@@ -32,6 +34,9 @@ createRoot(document.getElementById('root')!).render(
               <Route path="grammar" element={<Grammar />} />
               <Route path="vocabulary" element={<Vocabulary />} />
               <Route path="practice" element={<Practice />} />
+              <Route path="practice/:topicId" element={<Practice />} />
+              <Route path="library" element={<Library />} />
+              <Route path="wordgame" element={<WordGame />} />
               <Route path="exam" element={<Exam />} />
               <Route path="admin" element={<Admin />} />
             </Route>
