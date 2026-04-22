@@ -89,14 +89,14 @@ export function WordGame() {
         <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 block">Hãy xếp thành từ có nghĩa là:</span>
         <h3 className="text-4xl font-black text-slate-800 mb-8">{currentWord?.meaning}</h3>
         
-        <div className="flex flex-wrap justify-center gap-2 mb-12 min-h-[64px] border-b-4 border-slate-100 pb-4">
+        <div className="flex flex-wrap justify-center gap-2 mb-12 min-h-[56px] border-b-4 border-slate-100 pb-4">
           <AnimatePresence>
             {userSelection.map((char, i) => (
               <motion.div
                 key={`${char}-${i}`}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="w-12 h-12 md:w-14 md:h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-[0_4px_0_#3730a3]"
+                className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-[0_4px_0_#3730a3]"
               >
                 {char}
               </motion.div>
@@ -104,14 +104,14 @@ export function WordGame() {
           </AnimatePresence>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex flex-wrap justify-center gap-2">
           {scrambled.map((char, i) => (
             <motion.button
               key={`${char}-${i}`}
               whileHover={{ y: -4 }}
               whileActive={{ scale: 0.9 }}
               onClick={() => handleCharClick(char, i)}
-              className="w-12 h-12 md:w-14 md:h-14 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center text-slate-800 font-black text-2xl shadow-[0_4px_0_#e2e8f0] hover:border-indigo-400"
+              className="w-10 h-10 md:w-12 md:h-12 bg-white border-2 border-slate-200 rounded-xl flex items-center justify-center text-slate-800 font-black text-xl shadow-[0_4px_0_#e2e8f0] hover:border-indigo-400"
             >
               {char}
             </motion.button>
@@ -123,9 +123,9 @@ export function WordGame() {
         <Button 
           variant="outline" 
           onClick={resetSelection}
-          className="h-14 px-8 rounded-2xl border-2 border-slate-900 font-black flex items-center gap-2 hover:bg-slate-50"
+          className="h-11 px-6 rounded-xl border-2 border-slate-900 font-black flex items-center gap-2 hover:bg-slate-50 text-sm"
         >
-          <RotateCcw className="w-5 h-5" /> LÀM LẠI
+          <RotateCcw className="w-4 h-4" /> LÀM LẠI
         </Button>
       </div>
 
