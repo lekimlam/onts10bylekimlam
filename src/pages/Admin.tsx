@@ -250,32 +250,60 @@ export function Admin() {
         // Unit 1: Family Life
         { word: 'Breadwinner', meaning: 'Người trụ cột (kiếm tiền)', pronunciation: '/ˈbredwɪnə(r)/', example: 'In many families, the father is the breadwinner.', topic: 'Family Life', createdAt: now },
         { word: 'Homemaker', meaning: 'Người nội trợ', pronunciation: '/ˈhəʊmmeɪkə(r)/', example: 'She chose to be a homemaker to look after her children.', topic: 'Family Life', createdAt: now },
-        { word: 'Chores', meaning: 'Công việc vặt trong nhà', pronunciation: '/tʃɔː(r)z/', example: 'We share the household chores equally.', topic: 'Family Life', createdAt: now },
+        { word: 'Household chores', meaning: 'Công việc vặt trong nhà', pronunciation: '/ˌhaʊshəʊld ˈtʃɔːz/', example: 'We share the household chores equally.', topic: 'Family Life', createdAt: now },
+        { word: 'Heavy lifting', meaning: 'Việc nặng nhọc', pronunciation: '/ˌhevi ˈlɪftɪŋ/', example: 'My father usually does the heavy lifting in my family.', topic: 'Family Life', createdAt: now },
         { word: 'Nurture', meaning: 'Nuôi dưỡng', pronunciation: '/ˈnɜːtʃə(r)/', example: 'Parents should nurture their children\'s talents.', topic: 'Family Life', createdAt: now },
         
         // Unit 2: Humans and the Environment
         { word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.', topic: 'Environment', createdAt: now },
-        { word: 'Pollution', meaning: 'Sự ô nhiễm', pronunciation: '/pəˈluːʃn/', example: 'Air pollution is a big problem in big cities.', topic: 'Environment', createdAt: now },
         { word: 'Carbon footprint', meaning: 'Dấu chân carbon', pronunciation: '/ˌkɑːbən ˈfʊtprɪnt/', example: 'We should try to reduce our carbon footprint.', topic: 'Environment', createdAt: now },
         { word: 'Eco-friendly', meaning: 'Thân thiện với môi trường', pronunciation: '/ˌiːkəʊ ˈfrendli/', example: 'I prefer using eco-friendly products.', topic: 'Environment', createdAt: now },
         { word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'We need sustainable development.', topic: 'Environment', createdAt: now },
+        { word: 'Biodiversity', meaning: 'Đa dạng sinh học', pronunciation: '/ˌbaɪəʊdaɪˈvɜːsəti/', example: 'Protecting biodiversity is vital.', topic: 'Environment', createdAt: now },
         
         // Unit 3: Music
         { word: 'Concert', meaning: 'Buổi hòa nhạc', pronunciation: '/ˈkɒnsət/', example: 'The concert was held in the national stadium.', topic: 'Music', createdAt: now },
         { word: 'Audience', meaning: 'Khán giả', pronunciation: '/ˈɔːdiəns/', example: 'The audience cheered loudly after the performance.', topic: 'Music', createdAt: now },
         { word: 'Composer', meaning: 'Nhà soạn nhạc', pronunciation: '/kəmˈpəʊzə(r)/', example: 'Trinh Cong Son was a famous composer.', topic: 'Music', createdAt: now },
         { word: 'Instrument', meaning: 'Nhạc cụ', pronunciation: '/ˈɪnstrʊmənt/', example: 'What musical instrument can you play?', topic: 'Music', createdAt: now },
+        { word: 'Talented', meaning: 'Có tài năng', pronunciation: '/ˈtæləntɪd/', example: 'She is a very talented singer.', topic: 'Music', createdAt: now },
         
-        // Unit 4: For a better community
+        // Unit 4: For a Better Community
         { word: 'Volunteer', meaning: 'Tình nguyện viên', pronunciation: '/ˌvɒlənˈtɪə(r)/', example: 'They are working as volunteers at the local hospital.', topic: 'Community', createdAt: now },
         { word: 'Contribution', meaning: 'Sự đóng góp', pronunciation: '/ˌkɒntrɪˈbjuːʃn/', example: 'He made a generous contribution to the charity.', topic: 'Community', createdAt: now },
         { word: 'Disadvantaged', meaning: 'Thiệt thòi, hoàn cảnh khó khăn', pronunciation: '/ˌdɪsədˈvɑːntɪdʒd/', example: 'We help disadvantaged children in rural areas.', topic: 'Community', createdAt: now },
+        { word: 'Charity', meaning: 'Từ thiện', pronunciation: '/ˈtʃærəti/', example: 'Many people donate money to charity.', topic: 'Community', createdAt: now },
         
         // Unit 5: Inventions
         { word: 'Technology', meaning: 'Công nghệ', pronunciation: '/tekˈnɒlədʒi/', example: 'Modern technology has changed our lives.', topic: 'Technology', createdAt: now },
         { word: 'Invention', meaning: 'Sự phát minh', pronunciation: '/ɪnˈvenʃn/', example: 'The internet is a great invention.', topic: 'Technology', createdAt: now },
         { word: 'Device', meaning: 'Thiết bị', pronunciation: '/dɪˈvaɪs/', example: 'A smartphone is a versatile device.', topic: 'Technology', createdAt: now },
-        { word: 'Portable', meaning: 'Có thể mang theo, di động', pronunciation: '/ˈpɔːtəbl/', example: 'Laptops are portable computers.', topic: 'Technology', createdAt: now }
+        { word: 'Portable', meaning: 'Có thể mang theo, di động', pronunciation: '/ˈpɔːtəbl/', example: 'Laptops are portable computers.', topic: 'Technology', createdAt: now },
+
+        // Unit 6: Gender Equality
+        { word: 'Equality', meaning: 'Sự bình đẳng', pronunciation: '/iˈkwɒləti/', example: 'Gender equality is a basic human right.', topic: 'Gender Equality', createdAt: now },
+        { word: 'Discrimination', meaning: 'Sự phân biệt đối xử', pronunciation: '/dɪˌskrɪmɪˈneɪʃn/', example: 'We should end gender discrimination.', topic: 'Gender Equality', createdAt: now },
+        { word: 'Opportunity', meaning: 'Cơ hội', pronunciation: '/ˌɒpəˈtjuːnəti/', example: 'Women should have equal opportunities in education.', topic: 'Gender Equality', createdAt: now },
+
+        // Unit 7: Viet Nam and International Organizations
+        { word: 'Organization', meaning: 'Tổ chức', pronunciation: '/ˌɔːɡənaɪˈzeɪʃn/', example: 'The WHO is an international organization.', topic: 'International', createdAt: now },
+        { word: 'Participate', meaning: 'Tham gia', pronunciation: '/pɑːˈtɪsɪpeɪt/', example: 'Viet Nam participates in many UN missions.', topic: 'International', createdAt: now },
+        { word: 'Development', meaning: 'Sự phát triển', pronunciation: '/dɪˈveləpmənt/', example: 'Sustainable development is crucial.', topic: 'International', createdAt: now },
+
+        // Unit 8: New Ways to Learn
+        { word: 'Distance learning', meaning: 'Học từ xa', pronunciation: '/ˈdɪstəns ˈlɜːnɪŋ/', example: 'Distance learning became popular during the pandemic.', topic: 'Education', createdAt: now },
+        { word: 'Digital', meaning: 'Kỹ thuật số', pronunciation: '/ˈdɪdʒɪtl/', example: 'Digital devices are essential for online learning.', topic: 'Education', createdAt: now },
+        { word: 'Interactive', meaning: 'Tương tác', pronunciation: '/ˌɪntərˈæktɪv/', example: 'Interactive apps make learning fun.', topic: 'Education', createdAt: now },
+
+        // Unit 9: Protecting The Environment
+        { word: 'Conservation', meaning: 'Sự bảo tồn', pronunciation: '/ˌkɒnsəˈveɪʃn/', example: 'Nature conservation is our primary duty.', topic: 'Nature', createdAt: now },
+        { word: 'Endangered', meaning: 'Đang gặp nguy hiểm (tuyệt chủng)', pronunciation: '/ɪnˈdeɪndʒəd/', example: 'Tigers are an endangered species.', topic: 'Nature', createdAt: now },
+        { word: 'Awareness', meaning: 'Sự nhận thức', pronunciation: '/əˈweənəs/', example: 'We must raise awareness about wildlife protection.', topic: 'Nature', createdAt: now },
+
+        // Unit 10: Ecotourism
+        { word: 'Ecotourism', meaning: 'Du lịch sinh thái', pronunciation: '/ˈiːkəʊtʊərɪzəm/', example: 'Ecotourism benefits both people and nature.', topic: 'Ecotourism', createdAt: now },
+        { word: 'Destination', meaning: 'Điểm đến', pronunciation: '/ˌdestɪˈneɪʃn/', example: 'Phong Nha is a famous ecotourism destination.', topic: 'Ecotourism', createdAt: now },
+        { word: 'Environmental', meaning: 'Thuộc về môi trường', pronunciation: '/ɪnˌvaɪrənˈmentl/', example: 'Ecotourism minimizes environmental impact.', topic: 'Ecotourism', createdAt: now }
       ];
       for (const item of vocabItems) await addDoc(vocabRef, item);
 
@@ -621,12 +649,6 @@ Lưu ý đặc biệt:
           className={`px-4 md:px-6 py-2 rounded-2xl font-bold transition-all text-sm md:text-base ${activeTab === 'content' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50'}`}
         >
           Quản lý Nội dung
-        </button>
-        <button 
-          onClick={() => setActiveTab('ai')}
-          className={`px-4 md:px-6 py-2 rounded-2xl font-bold transition-all text-sm md:text-base ${activeTab === 'ai' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50'}`}
-        >
-          Trợ lý AI & Nhập liệu
         </button>
         <button 
           onClick={() => setActiveTab('settings')}
