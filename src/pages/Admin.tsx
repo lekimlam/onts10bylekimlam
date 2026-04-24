@@ -12,7 +12,7 @@ import { GoogleGenAI } from '@google/genai';
 
 export function Admin() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'content' | 'ai' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'content' | 'settings'>('overview');
   const [contentSubTab, setContentSubTab] = useState<'grammar' | 'vocabulary' | 'practice' | 'exam'>('grammar');
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -24,10 +24,8 @@ export function Admin() {
   const [editingContent, setEditingContent] = useState<any | null>(null);
   const [newPassword, setNewPassword] = useState('');
 
-  // AI & Import states
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [aiResponse, setAiResponse] = useState("");
-  const [isGeneratingData, setIsGeneratingData] = useState(false);
+  // Import states
+  const [importData, setImportData] = useState("");
   const [targetCollection, setTargetCollection] = useState("flashcards");
 
   const fetchUsers = async () => {
@@ -253,13 +251,24 @@ export function Admin() {
         { word: 'Household chores', meaning: 'Công việc vặt trong nhà', pronunciation: '/ˌhaʊshəʊld ˈtʃɔːz/', example: 'We share the household chores equally.', topic: 'Family Life', createdAt: now },
         { word: 'Heavy lifting', meaning: 'Việc nặng nhọc', pronunciation: '/ˌhevi ˈlɪftɪŋ/', example: 'My father usually does the heavy lifting in my family.', topic: 'Family Life', createdAt: now },
         { word: 'Nurture', meaning: 'Nuôi dưỡng', pronunciation: '/ˈnɜːtʃə(r)/', example: 'Parents should nurture their children\'s talents.', topic: 'Family Life', createdAt: now },
+        { word: 'Groceries', meaning: 'Thực phẩm và đồ dùng gia đình', pronunciation: '/ˈɡrəʊsəriz/', example: 'My mother goes to the supermarket to buy groceries.', topic: 'Family Life', createdAt: now },
+        { word: 'Responsibility', meaning: 'Trách nhiệm', pronunciation: '/rɪˌspɒnsəˈbɪləti/', example: 'Keeping the house clean is our shared responsibility.', topic: 'Family Life', createdAt: now },
+        { word: 'Gratitude', meaning: 'Lòng biết ơn', pronunciation: '/ˈɡrætɪtjuːd/', example: 'We should express our gratitude to our parents.', topic: 'Family Life', createdAt: now },
+        { word: 'Strengthen', meaning: 'Làm cho mạnh thêm, củng cố', pronunciation: '/ˈstreŋθn/', example: 'Doing chores together helps strengthen family bonds.', topic: 'Family Life', createdAt: now },
+        { word: 'Character', meaning: 'Tính cách, nhân vật', pronunciation: '/ˈkærəktə(r)/', example: 'Shared chores help build a child\'s character.', topic: 'Family Life', createdAt: now },
         
         // Unit 2: Humans and the Environment
         { word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.', topic: 'Environment', createdAt: now },
+        { word: 'Pollution', meaning: 'Sự ô nhiễm', pronunciation: '/pəˈluːʃn/', example: 'Air pollution is a big problem in big cities.', topic: 'Environment', createdAt: now },
         { word: 'Carbon footprint', meaning: 'Dấu chân carbon', pronunciation: '/ˌkɑːbən ˈfʊtprɪnt/', example: 'We should try to reduce our carbon footprint.', topic: 'Environment', createdAt: now },
         { word: 'Eco-friendly', meaning: 'Thân thiện với môi trường', pronunciation: '/ˌiːkəʊ ˈfrendli/', example: 'I prefer using eco-friendly products.', topic: 'Environment', createdAt: now },
         { word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'We need sustainable development.', topic: 'Environment', createdAt: now },
         { word: 'Biodiversity', meaning: 'Đa dạng sinh học', pronunciation: '/ˌbaɪəʊdaɪˈvɜːsəti/', example: 'Protecting biodiversity is vital.', topic: 'Environment', createdAt: now },
+        { word: 'Renewable', meaning: 'Có thể tái tạo', pronunciation: '/rɪˈnjuːəbl/', example: 'Solar energy is a renewable source of energy.', topic: 'Environment', createdAt: now },
+        { word: 'Organic', meaning: 'Hữu cơ', pronunciation: '/ɔːˈɡænɪk/', example: 'Organic farming is better for the environment.', topic: 'Environment', createdAt: now },
+        { word: 'Raw materials', meaning: 'Nguyên liệu thô', pronunciation: '/ˌrɔː məˈtɪəriəlz/', example: 'We should use less raw materials from nature.', topic: 'Environment', createdAt: now },
+        { word: 'Ecosystem', meaning: 'Hệ sinh thái', pronunciation: '/ˈiːkəʊsɪstəm/', example: 'Climate change affects the global ecosystem.', topic: 'Environment', createdAt: now },
+        { word: 'Single-use', meaning: 'Dùng một lần', pronunciation: '/ˌsɪŋɡl ˈjuːs/', example: 'Single-use plastics are harmful to the earth.', topic: 'Environment', createdAt: now },
         
         // Unit 3: Music
         { word: 'Concert', meaning: 'Buổi hòa nhạc', pronunciation: '/ˈkɒnsət/', example: 'The concert was held in the national stadium.', topic: 'Music', createdAt: now },
@@ -267,43 +276,76 @@ export function Admin() {
         { word: 'Composer', meaning: 'Nhà soạn nhạc', pronunciation: '/kəmˈpəʊzə(r)/', example: 'Trinh Cong Son was a famous composer.', topic: 'Music', createdAt: now },
         { word: 'Instrument', meaning: 'Nhạc cụ', pronunciation: '/ˈɪnstrʊmənt/', example: 'What musical instrument can you play?', topic: 'Music', createdAt: now },
         { word: 'Talented', meaning: 'Có tài năng', pronunciation: '/ˈtæləntɪd/', example: 'She is a very talented singer.', topic: 'Music', createdAt: now },
+        { word: 'Rhythm', meaning: 'Nhịp điệu', pronunciation: '/ˈrɪðəm/', example: 'The rhythm of the song is very upbeat.', topic: 'Music', createdAt: now },
+        { word: 'Performance', meaning: 'Buổi biểu diễn', pronunciation: '/pəˈfɔːməns/', example: 'His performance on stage was amazing.', topic: 'Music', createdAt: now },
+        { word: 'Judge', meaning: 'Giám khảo', pronunciation: '/dʒʌdʒ/', example: 'The judges were impressed by her voice.', topic: 'Music', createdAt: now },
+        { word: 'Award', meaning: 'Giải thưởng', pronunciation: '/əˈwɔːd/', example: 'He won many prestigious music awards.', topic: 'Music', createdAt: now },
+        { word: 'Global', meaning: 'Toàn cầu', pronunciation: '/ˈɡləʊbl/', example: 'K-pop has gained global popularity.', topic: 'Music', createdAt: now },
         
         // Unit 4: For a Better Community
         { word: 'Volunteer', meaning: 'Tình nguyện viên', pronunciation: '/ˌvɒlənˈtɪə(r)/', example: 'They are working as volunteers at the local hospital.', topic: 'Community', createdAt: now },
         { word: 'Contribution', meaning: 'Sự đóng góp', pronunciation: '/ˌkɒntrɪˈbjuːʃn/', example: 'He made a generous contribution to the charity.', topic: 'Community', createdAt: now },
         { word: 'Disadvantaged', meaning: 'Thiệt thòi, hoàn cảnh khó khăn', pronunciation: '/ˌdɪsədˈvɑːntɪdʒd/', example: 'We help disadvantaged children in rural areas.', topic: 'Community', createdAt: now },
         { word: 'Charity', meaning: 'Từ thiện', pronunciation: '/ˈtʃærəti/', example: 'Many people donate money to charity.', topic: 'Community', createdAt: now },
+        { word: 'Meaningful', meaning: 'Có ý nghĩa', pronunciation: '/ˈmiːnɪŋfl/', example: 'Volunteering is a meaningful activity.', topic: 'Community', createdAt: now },
+        { word: 'Opportunity', meaning: 'Cơ hội', pronunciation: '/ˌɒpəˈtjuːnəti/', example: 'This is a great opportunity to learn new skills.', topic: 'Community', createdAt: now },
+        { word: 'Donate', meaning: 'Quyên góp', pronunciation: '/dəʊˈneɪt/', example: 'You can donate old clothes to the poor.', topic: 'Community', createdAt: now },
+        { word: 'Advertisement', meaning: 'Quảng cáo', pronunciation: '/ədˈvɜːtɪsmənt/', example: 'I saw an advertisement for volunteers on TV.', topic: 'Community', createdAt: now },
         
         // Unit 5: Inventions
         { word: 'Technology', meaning: 'Công nghệ', pronunciation: '/tekˈnɒlədʒi/', example: 'Modern technology has changed our lives.', topic: 'Technology', createdAt: now },
         { word: 'Invention', meaning: 'Sự phát minh', pronunciation: '/ɪnˈvenʃn/', example: 'The internet is a great invention.', topic: 'Technology', createdAt: now },
         { word: 'Device', meaning: 'Thiết bị', pronunciation: '/dɪˈvaɪs/', example: 'A smartphone is a versatile device.', topic: 'Technology', createdAt: now },
         { word: 'Portable', meaning: 'Có thể mang theo, di động', pronunciation: '/ˈpɔːtəbl/', example: 'Laptops are portable computers.', topic: 'Technology', createdAt: now },
+        { word: 'Processor', meaning: 'Bộ vi xử lý', pronunciation: '/ˈprəʊsesə(r)/', example: 'This computer has a very fast processor.', topic: 'Technology', createdAt: now },
+        { word: 'Electronic', meaning: 'Điện tử', pronunciation: '/ɪˌlekˈtrɒnɪk/', example: 'Tablets are popular electronic devices.', topic: 'Technology', createdAt: now },
+        { word: 'Artificial Intelligence', meaning: 'Trí tuệ nhân tạo', pronunciation: '/ˌɑːtɪˈfɪʃl ɪnˈtelɪɡəns/', example: 'AI is becoming more common in our daily lives.', topic: 'Technology', createdAt: now },
+        { word: 'Storage', meaning: 'Lưu trữ', pronunciation: '/ˈstɔːrɪdʒ/', example: 'Cloud storage is very convenient for data.', topic: 'Technology', createdAt: now },
 
         // Unit 6: Gender Equality
         { word: 'Equality', meaning: 'Sự bình đẳng', pronunciation: '/iˈkwɒləti/', example: 'Gender equality is a basic human right.', topic: 'Gender Equality', createdAt: now },
-        { word: 'Discrimination', meaning: 'Sự phân biệt đối xử', pronunciation: '/dɪˌskrɪmɪˈneɪʃn/', example: 'We should end gender discrimination.', topic: 'Gender Equality', createdAt: now },
+        { word: 'Discrimination', meaning: 'Sự phân biệt đối xử', pronunciation: '/dɪˌskrɪmɪˈneɪʃn/', example: 'We should end gender discrimination in the workplace.', topic: 'Gender Equality', createdAt: now },
         { word: 'Opportunity', meaning: 'Cơ hội', pronunciation: '/ˌɒpəˈtjuːnəti/', example: 'Women should have equal opportunities in education.', topic: 'Gender Equality', createdAt: now },
+        { word: 'Challenge', meaning: 'Thách thức', pronunciation: '/ˈtʃælɪndʒ/', example: 'Overcoming gender bias is a big challenge.', topic: 'Gender Equality', createdAt: now },
+        { word: 'Encourage', meaning: 'Khuyến khích', pronunciation: '/ɪnˈkʌrɪdʒ/', example: 'We should encourage girls to study STEM subjects.', topic: 'Gender Equality', createdAt: now },
+        { word: 'Career', meaning: 'Sự nghiệp', pronunciation: '/kəˈrɪə(r)/', example: 'She has a successful career in medicine.', topic: 'Gender Equality', createdAt: now },
+        { word: 'Wage', meaning: 'Tiền lương', pronunciation: '/weɪdʒ/', example: 'The gender wage gap is still a problem.', topic: 'Gender Equality', createdAt: now },
 
         // Unit 7: Viet Nam and International Organizations
         { word: 'Organization', meaning: 'Tổ chức', pronunciation: '/ˌɔːɡənaɪˈzeɪʃn/', example: 'The WHO is an international organization.', topic: 'International', createdAt: now },
         { word: 'Participate', meaning: 'Tham gia', pronunciation: '/pɑːˈtɪsɪpeɪt/', example: 'Viet Nam participates in many UN missions.', topic: 'International', createdAt: now },
-        { word: 'Development', meaning: 'Sự phát triển', pronunciation: '/dɪˈveləpmənt/', example: 'Sustainable development is crucial.', topic: 'International', createdAt: now },
+        { word: 'Development', meaning: 'Sự phát triển', pronunciation: '/dɪˈveləpmənt/', example: 'Sustainable development is crucial for the future.', topic: 'International', createdAt: now },
+        { word: 'Exchange', meaning: 'Trao đổi', pronunciation: '/ɪksˈtʃeɪndʒ/', example: 'Cultural exchange programs help people understand each other.', topic: 'International', createdAt: now },
+        { word: 'Partner', meaning: 'Đối tác', pronunciation: '/ˈpɑːtnə(r)/', example: 'Viet Nam is a reliable partner in the region.', topic: 'International', createdAt: now },
+        { word: 'Technical', meaning: 'Kỹ thuật', pronunciation: '/ˈteknɪkl/', example: 'We need technical support for this project.', topic: 'International', createdAt: now },
+        { word: 'Expert', meaning: 'Chuyên gia', pronunciation: '/ˈekspɜːt/', example: 'UN experts help Viet Nam in various fields.', topic: 'International', createdAt: now },
 
         // Unit 8: New Ways to Learn
         { word: 'Distance learning', meaning: 'Học từ xa', pronunciation: '/ˈdɪstəns ˈlɜːnɪŋ/', example: 'Distance learning became popular during the pandemic.', topic: 'Education', createdAt: now },
         { word: 'Digital', meaning: 'Kỹ thuật số', pronunciation: '/ˈdɪdʒɪtl/', example: 'Digital devices are essential for online learning.', topic: 'Education', createdAt: now },
-        { word: 'Interactive', meaning: 'Tương tác', pronunciation: '/ˌɪntərˈæktɪv/', example: 'Interactive apps make learning fun.', topic: 'Education', createdAt: now },
+        { word: 'Interactive', meaning: 'Tương tác', pronunciation: '/ˌɪntərˈæktɪv/', example: 'Interactive apps make learning more fun and engaging.', topic: 'Education', createdAt: now },
+        { word: 'Strategy', meaning: 'Chiến lược', pronunciation: '/ˈstrætədʒi/', example: 'Teachers should use different teaching strategies.', topic: 'Education', createdAt: now },
+        { word: 'Access', meaning: 'Tiếp cận', pronunciation: '/ˈækses/', example: 'Students should have equal access to quality education.', topic: 'Education', createdAt: now },
+        { word: 'Blended learning', meaning: 'Học tập kết hợp (online và offline)', pronunciation: '/ˌblendɪd ˈlɜːnɪŋ/', example: 'Blended learning is a effective way to study.', topic: 'Education', createdAt: now },
+        { word: 'Application', meaning: 'Ứng dụng', pronunciation: '/ˌæplɪˈkeɪʃn/', example: 'There are many educational applications available.', topic: 'Education', createdAt: now },
 
         // Unit 9: Protecting The Environment
         { word: 'Conservation', meaning: 'Sự bảo tồn', pronunciation: '/ˌkɒnsəˈveɪʃn/', example: 'Nature conservation is our primary duty.', topic: 'Nature', createdAt: now },
         { word: 'Endangered', meaning: 'Đang gặp nguy hiểm (tuyệt chủng)', pronunciation: '/ɪnˈdeɪndʒəd/', example: 'Tigers are an endangered species.', topic: 'Nature', createdAt: now },
         { word: 'Awareness', meaning: 'Sự nhận thức', pronunciation: '/əˈweənəs/', example: 'We must raise awareness about wildlife protection.', topic: 'Nature', createdAt: now },
+        { word: 'Preserve', meaning: 'Gìn giữ, bảo tồn', pronunciation: '/prɪˈzɜːv/', example: 'We should preserve our natural resources.', topic: 'Nature', createdAt: now },
+        { word: 'Climate change', meaning: 'Biến đổi khí hậu', pronunciation: '/ˈklaɪmət tʃeɪndʒ/', example: 'Climate change is a global threat.', topic: 'Nature', createdAt: now },
+        { word: 'Impact', meaning: 'Tác động', pronunciation: '/ˈɪmpækt/', example: 'Human activities have a big impact on nature.', topic: 'Nature', createdAt: now },
+        { word: 'Atmosphere', meaning: 'Bầu khí quyển', pronunciation: '/ˈætməsfɪə(r)/', example: 'Pollution is building up in the atmosphere.', topic: 'Nature', createdAt: now },
 
         // Unit 10: Ecotourism
         { word: 'Ecotourism', meaning: 'Du lịch sinh thái', pronunciation: '/ˈiːkəʊtʊərɪzəm/', example: 'Ecotourism benefits both people and nature.', topic: 'Ecotourism', createdAt: now },
         { word: 'Destination', meaning: 'Điểm đến', pronunciation: '/ˌdestɪˈneɪʃn/', example: 'Phong Nha is a famous ecotourism destination.', topic: 'Ecotourism', createdAt: now },
-        { word: 'Environmental', meaning: 'Thuộc về môi trường', pronunciation: '/ɪnˌvaɪrənˈmentl/', example: 'Ecotourism minimizes environmental impact.', topic: 'Ecotourism', createdAt: now }
+        { word: 'Environmental', meaning: 'Thuộc về môi trường', pronunciation: '/ɪnˌvaɪrənˈmentl/', example: 'Ecotourism minimizes environmental impact.', topic: 'Ecotourism', createdAt: now },
+        { word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'Sustainable tourism is the goal of our project.', topic: 'Ecotourism', createdAt: now },
+        { word: 'Local', meaning: 'Địa phương', pronunciation: '/ˈləʊkl/', example: 'We should support local products and services.', topic: 'Ecotourism', createdAt: now },
+        { word: 'Ecosystem', meaning: 'Hệ sinh thái', pronunciation: '/ˈiːkəʊsɪstəm/', example: 'The coral reef is a complex ecosystem.', topic: 'Ecotourism', createdAt: now },
+        { word: 'Observation', meaning: 'Sự quan sát', pronunciation: '/ˌɒbzəˈveɪʃn/', example: 'Bird observation is a popular ecotourism activity.', topic: 'Ecotourism', createdAt: now }
       ];
       for (const item of vocabItems) await addDoc(vocabRef, item);
 
@@ -445,93 +487,15 @@ export function Admin() {
     }
   };
 
-  const handleGenerateAI = async () => {
-    if (!aiPrompt.trim()) return;
-    setIsGeneratingData(true);
-    setAiResponse("Đang phân tích và khởi tạo dữ liệu mẫu...");
-    try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("Chưa cấu hình VITE_GEMINI_API_KEY trong Environment Variables.");
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-      
-      const schemas: any = {
-        flashcards: {
-          type: "object",
-          properties: {
-            word: { type: "string" },
-            meaning: { type: "string" },
-            pronunciation: { type: "string" },
-            example: { type: "string" },
-            topic: { type: "string" }
-          },
-          required: ["word", "meaning"]
-        },
-        questions: {
-          type: "object",
-          properties: {
-            type: { type: "string", description: "multiple_choice, fill_blank, sorting, listening" },
-            content: { type: "string" },
-            options: { type: "array", items: { type: "string" } },
-            correctAnswer: { type: "string" },
-            explanation: { type: "string" },
-            difficulty: { type: "string", description: "easy, medium, hard" }
-          },
-          required: ["type", "content", "correctAnswer"]
-        },
-        grammar: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            description: { type: "string" },
-            structure: { type: "string" },
-            signs: { type: "array", items: { type: "string" } },
-            order: { type: "number" }
-          },
-          required: ["title", "description", "structure"]
-        },
-        exams: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            description: { type: "string" },
-            durationMinutes: { type: "number" },
-            questions: { type: "array" }
-          },
-          required: ["title", "durationMinutes"]
-        }
-      };
-
-      const prompt = `Bạn là chuyên gia về Tiếng Anh và cấu trúc dữ liệu JSON.
-Hành động: Phân tích yêu cầu "${aiPrompt}" và tạo ra bộ dữ liệu mẫu phù hợp cho bảng "${targetCollection}".
-Lưu ý đặc biệt:
-- Nếu yêu cầu là một danh sách từ vựng thô, hãy chia chúng thành các "topic" (chủ đề) Tiếng Anh phù hợp (ví dụ: Family, Work, Nature, Tech...).
-- Đảm bảo "pronunciation" (phiên âm) chính xác theo chuẩn IPA.
-- Phần "example" phải là một câu Tiếng Anh hay, minh họa rõ cách dùng từ.
-- Trả về kết quả là một MẢNG các đối tượng JSON hợp lệ.`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "array",
-            items: schemas[targetCollection]
-          }
-        }
-      });
-
-      const text = response.text || "";
-      setAiResponse(text);
-    } catch(err: any) {
-      toast.error("Lỗi AI (Flash): " + err.message);
-      setAiResponse("");
-    } finally {
-      setIsGeneratingData(false);
-    }
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImportData(event.target?.result as string);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleImportJSON = async (jsonData: string) => {
@@ -554,23 +518,13 @@ Lưu ý đặc biệt:
          count++;
       }
       toast.success(`Đã thêm thành công ${count} nội dung!`);
-      setAiResponse(""); // Clear sau khi nhập thành công
+      setImportData("");
+      fetchContent();
     } catch(err: any) {
       toast.error("Lỗi Parse/Nhập dữ liệu: " + err.message);
     } finally {
       setUpdating(false);
     }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setAiResponse(event.target?.result as string);
-    };
-    reader.readAsText(file);
-    e.target.value = ''; // Reset input để cho phép tải file cùng tên lần sau nều cần
   };
 
   useEffect(() => {
@@ -848,6 +802,56 @@ Lưu ý đặc biệt:
             </div>
           </div>
 
+          {/* Simple Import Area */}
+          <Card className="rounded-[32px] border-2 border-slate-200 shadow-none overflow-hidden h-fit">
+             <CardHeader className="bg-slate-50 p-6 border-b-2 border-slate-100 flex flex-row items-center justify-between">
+                <CardTitle className="font-black text-slate-800 flex items-center gap-2 text-lg">
+                   <FileJson size={20} /> Nhập dữ liệu JSON
+                </CardTitle>
+                <div className="flex gap-2">
+                   <input 
+                     type="file" 
+                     accept=".json" 
+                     id="json-upload" 
+                     className="hidden" 
+                     onChange={handleFileUpload} 
+                   />
+                   <label htmlFor="json-upload" className="cursor-pointer bg-white border-2 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
+                      <Upload size={14} /> Tải file
+                   </label>
+                </div>
+             </CardHeader>
+             <CardContent className="p-6 space-y-4">
+                <textarea 
+                   rows={3}
+                   placeholder="Dán mã JSON mảng [...] vào đây để nhập nhanh..."
+                   value={importData}
+                   onChange={(e) => setImportData(e.target.value)}
+                   className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-mono text-sm tracking-tight resize-none focus:border-indigo-500 transition-all whitespace-pre"
+                />
+                
+                <div className="flex flex-col md:flex-row gap-4 items-center">
+                   <select 
+                      value={targetCollection}
+                      onChange={(e) => setTargetCollection(e.target.value)}
+                      className="flex-1 h-12 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 font-bold focus:border-indigo-500 text-sm"
+                   >
+                      <option value="flashcards">Từ vựng (flashcards)</option>
+                      <option value="questions">Câu hỏi luyện tập (questions)</option>
+                      <option value="grammar">Ngữ pháp (grammar)</option>
+                      <option value="exams">Đề thi (exams)</option>
+                   </select>
+                   <Button 
+                      onClick={() => handleImportJSON(importData)}
+                      disabled={updating || !importData.trim()}
+                      className="h-12 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black shadow-lg shadow-emerald-200 text-xs"
+                   >
+                      {updating ? 'ĐANG NHẬP...' : 'NHẬP VÀO DATABASE'}
+                   </Button>
+                </div>
+             </CardContent>
+          </Card>
+
           <div className="flex gap-2 p-1 bg-white border-2 border-slate-100 rounded-2xl w-full md:w-fit overflow-x-auto no-scrollbar">
             {[
               { id: 'grammar', name: 'Ngữ pháp', icon: BookOpen },
@@ -931,104 +935,6 @@ Lưu ý đặc biệt:
               </table>
             </div>
           </div>
-        </div>
-      )}
-
-      {activeTab === 'ai' && (
-        <div className="space-y-8">
-           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3">
-                   <Sparkles className="text-amber-500" /> Trợ lý AI & Nhập liệu
-                </h2>
-                <p className="text-slate-500 font-medium">Sử dụng sức mạnh của Gemini để sinh dữ liệu mẫu hoặc nhập từ file JSON.</p>
-              </div>
-           </div>
-
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card className="rounded-[32px] border-2 border-slate-200 shadow-none hover:border-slate-300 transition-all overflow-hidden h-fit">
-                 <CardHeader className="bg-slate-50 p-6 border-b-2 border-slate-100">
-                    <CardTitle className="font-black text-slate-800 flex items-center gap-2">
-                       Tạo dữ liệu bằng AI
-                    </CardTitle>
-                 </CardHeader>
-                 <CardContent className="p-6 space-y-4">
-                    <p className="text-sm font-medium text-slate-500">
-                       Nhập yêu cầu để Gemini tạo dữ liệu mẫu (Ví dụ: "Tạo 5 flashcards chủ đề gia đình", "Tạo 5 câu trắc nghiệm ngữ pháp quá khứ đơn").
-                    </p>
-                    <textarea 
-                       rows={4}
-                       placeholder="Nhập yêu cầu tạo dữ liệu vào đây..."
-                       value={aiPrompt}
-                       onChange={(e) => setAiPrompt(e.target.value)}
-                       className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-medium resize-none focus:border-indigo-500 transition-all"
-                    />
-                    <Button 
-                       onClick={handleGenerateAI}
-                       disabled={isGeneratingData || !aiPrompt.trim()}
-                       className="w-full h-12 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black shadow-lg shadow-slate-200 flex items-center justify-center gap-2"
-                    >
-                       {isGeneratingData ? (
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                       ) : (
-                          <><Sparkles size={18} /> TẠO DỮ LIỆU JSON</>
-                       )}
-                    </Button>
-                 </CardContent>
-              </Card>
-
-              <Card className="rounded-[32px] border-2 border-slate-200 shadow-none hover:border-slate-300 transition-all overflow-hidden">
-                 <CardHeader className="bg-slate-50 p-6 border-b-2 border-slate-100 flex flex-row items-center justify-between">
-                    <CardTitle className="font-black text-slate-800 flex items-center gap-2">
-                       <FileJson size={20} /> Kết quả JSON / Upload
-                    </CardTitle>
-                    <div>
-                       <input 
-                         type="file" 
-                         accept=".json" 
-                         id="json-upload" 
-                         className="hidden" 
-                         onChange={handleFileUpload} 
-                       />
-                       <label htmlFor="json-upload" className="cursor-pointer bg-white border-2 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
-                          <Upload size={14} /> Tải file lên
-                       </label>
-                    </div>
-                 </CardHeader>
-                 <CardContent className="p-6 space-y-4">
-                    <textarea 
-                       rows={8}
-                       placeholder="[\n  {\n    'word': 'Sample',\n    'meaning': 'Mẫu'\n  }\n]"
-                       value={aiResponse}
-                       onChange={(e) => setAiResponse(e.target.value)}
-                       className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-mono text-sm tracking-tight resize-none focus:border-indigo-500 transition-all whitespace-pre"
-                    />
-                    
-                    <div className="pt-2 border-t-2 border-slate-100 space-y-4">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nhập vào Collection (Bảng dữ liệu)</label>
-                       <div className="flex flex-col md:flex-row gap-4">
-                          <select 
-                             value={targetCollection}
-                             onChange={(e) => setTargetCollection(e.target.value)}
-                             className="flex-1 h-14 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 font-bold focus:border-indigo-500"
-                          >
-                             <option value="flashcards">Từ vựng (flashcards)</option>
-                             <option value="questions">Câu hỏi luyện tập (questions)</option>
-                             <option value="grammar">Ngữ pháp (grammar)</option>
-                             <option value="exams">Đề thi (exams)</option>
-                          </select>
-                          <Button 
-                             onClick={() => handleImportJSON(aiResponse)}
-                             disabled={updating || !aiResponse.trim() || isGeneratingData}
-                             className="h-14 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black shadow-lg shadow-emerald-200"
-                          >
-                             {updating ? 'ĐANG NHẬP...' : 'NHẬP VÀO DATABASE'}
-                          </Button>
-                       </div>
-                    </div>
-                 </CardContent>
-              </Card>
-           </div>
         </div>
       )}
 
