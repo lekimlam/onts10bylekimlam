@@ -247,20 +247,35 @@ export function Admin() {
       // Vocabulary Seeds
       const vocabRef = collection(db, 'flashcards');
       const vocabItems = [
-        { word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.', topic: 'Nature', createdAt: now },
-        { word: 'Pollution', meaning: 'Sự ô nhiễm', pronunciation: '/pəluːʃn/', example: 'Air pollution is a big problem.', topic: 'Nature', createdAt: now },
-        { word: 'Benefit', meaning: 'Lợi ích', pronunciation: '/ˈbenɪfɪt/', example: 'Reading books has many benefits.', topic: 'Education', createdAt: now },
-        { word: 'Volunteer', meaning: 'Tình nguyện viên', pronunciation: '/ˌvɒlənˈtɪə(r)/', example: 'They are working as volunteers.', topic: 'Community', createdAt: now },
-        { word: 'Technology', meaning: 'Công nghệ', pronunciation: '/tekˈnɒlədʒi/', example: 'Technology changes our lives.', topic: 'Science', createdAt: now },
-        { word: 'Global Warming', meaning: 'Nóng lên toàn cầu', pronunciation: '/ˌɡləʊbl ˈwɔːmɪŋ/', example: 'Global warming is a serious threat.', topic: 'Nature', createdAt: now },
-        { word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'We need sustainable development.', topic: 'Science', createdAt: now },
-        { word: 'Biodiversity', meaning: 'Đa dạng sinh học', pronunciation: '/ˌbaɪəʊdaɪˈvɜːsəti/', example: 'Protecting biodiversity is vital.', topic: 'Nature', createdAt: now },
-        { word: 'Conservation', meaning: 'Sự bảo tồn', pronunciation: '/ˌkɒnsəˈveɪʃn/', example: 'The conservation of nature is a duty.', topic: 'Nature', createdAt: now },
-        { word: 'Ancestor', meaning: 'Tổ tiên', pronunciation: '/ˈænsestə(r)/', example: 'Our ancestors lived in caves.', topic: 'Family', createdAt: now },
-        { word: 'Generation', meaning: 'Thế hệ', pronunciation: '/ˌdʒenəˈreɪʃn/', example: 'Gap between generations is common.', topic: 'Family', createdAt: now },
-        { word: 'Heritage', meaning: 'Di sản', pronunciation: '/ˈherɪtɪdʒ/', example: 'Viet Nam has many cultural heritages.', topic: 'Culture', createdAt: now },
-        { word: 'Independent', meaning: 'Độc lập', pronunciation: '/ˌɪndɪˈpendənt/', example: 'Viet Nam became independent in 1945.', topic: 'Society', createdAt: now },
-        { word: 'Adventure', meaning: 'Cuộc phiêu lưu', pronunciation: '/ədˈventʃə(r)/', example: 'The book is about a great adventure.', topic: 'Book', createdAt: now }
+        // Unit 1: Family Life
+        { word: 'Breadwinner', meaning: 'Người trụ cột (kiếm tiền)', pronunciation: '/ˈbredwɪnə(r)/', example: 'In many families, the father is the breadwinner.', topic: 'Family Life', createdAt: now },
+        { word: 'Homemaker', meaning: 'Người nội trợ', pronunciation: '/ˈhəʊmmeɪkə(r)/', example: 'She chose to be a homemaker to look after her children.', topic: 'Family Life', createdAt: now },
+        { word: 'Chores', meaning: 'Công việc vặt trong nhà', pronunciation: '/tʃɔː(r)z/', example: 'We share the household chores equally.', topic: 'Family Life', createdAt: now },
+        { word: 'Nurture', meaning: 'Nuôi dưỡng', pronunciation: '/ˈnɜːtʃə(r)/', example: 'Parents should nurture their children\'s talents.', topic: 'Family Life', createdAt: now },
+        
+        // Unit 2: Humans and the Environment
+        { word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.', topic: 'Environment', createdAt: now },
+        { word: 'Pollution', meaning: 'Sự ô nhiễm', pronunciation: '/pəˈluːʃn/', example: 'Air pollution is a big problem in big cities.', topic: 'Environment', createdAt: now },
+        { word: 'Carbon footprint', meaning: 'Dấu chân carbon', pronunciation: '/ˌkɑːbən ˈfʊtprɪnt/', example: 'We should try to reduce our carbon footprint.', topic: 'Environment', createdAt: now },
+        { word: 'Eco-friendly', meaning: 'Thân thiện với môi trường', pronunciation: '/ˌiːkəʊ ˈfrendli/', example: 'I prefer using eco-friendly products.', topic: 'Environment', createdAt: now },
+        { word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'We need sustainable development.', topic: 'Environment', createdAt: now },
+        
+        // Unit 3: Music
+        { word: 'Concert', meaning: 'Buổi hòa nhạc', pronunciation: '/ˈkɒnsət/', example: 'The concert was held in the national stadium.', topic: 'Music', createdAt: now },
+        { word: 'Audience', meaning: 'Khán giả', pronunciation: '/ˈɔːdiəns/', example: 'The audience cheered loudly after the performance.', topic: 'Music', createdAt: now },
+        { word: 'Composer', meaning: 'Nhà soạn nhạc', pronunciation: '/kəmˈpəʊzə(r)/', example: 'Trinh Cong Son was a famous composer.', topic: 'Music', createdAt: now },
+        { word: 'Instrument', meaning: 'Nhạc cụ', pronunciation: '/ˈɪnstrʊmənt/', example: 'What musical instrument can you play?', topic: 'Music', createdAt: now },
+        
+        // Unit 4: For a better community
+        { word: 'Volunteer', meaning: 'Tình nguyện viên', pronunciation: '/ˌvɒlənˈtɪə(r)/', example: 'They are working as volunteers at the local hospital.', topic: 'Community', createdAt: now },
+        { word: 'Contribution', meaning: 'Sự đóng góp', pronunciation: '/ˌkɒntrɪˈbjuːʃn/', example: 'He made a generous contribution to the charity.', topic: 'Community', createdAt: now },
+        { word: 'Disadvantaged', meaning: 'Thiệt thòi, hoàn cảnh khó khăn', pronunciation: '/ˌdɪsədˈvɑːntɪdʒd/', example: 'We help disadvantaged children in rural areas.', topic: 'Community', createdAt: now },
+        
+        // Unit 5: Inventions
+        { word: 'Technology', meaning: 'Công nghệ', pronunciation: '/tekˈnɒlədʒi/', example: 'Modern technology has changed our lives.', topic: 'Technology', createdAt: now },
+        { word: 'Invention', meaning: 'Sự phát minh', pronunciation: '/ɪnˈvenʃn/', example: 'The internet is a great invention.', topic: 'Technology', createdAt: now },
+        { word: 'Device', meaning: 'Thiết bị', pronunciation: '/dɪˈvaɪs/', example: 'A smartphone is a versatile device.', topic: 'Technology', createdAt: now },
+        { word: 'Portable', meaning: 'Có thể mang theo, di động', pronunciation: '/ˈpɔːtəbl/', example: 'Laptops are portable computers.', topic: 'Technology', createdAt: now }
       ];
       for (const item of vocabItems) await addDoc(vocabRef, item);
 
