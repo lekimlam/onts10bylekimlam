@@ -407,9 +407,9 @@ export function Admin() {
     setIsGeneratingData(true);
     setAiResponse("Đang phân tích và khởi tạo dữ liệu mẫu...");
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        throw new Error("Chưa cấu hình GEMINI_API_KEY trong môi trường ứng dụng (Project Settings).");
+        throw new Error("Chưa cấu hình VITE_GEMINI_API_KEY trong Environment Variables.");
       }
 
       const ai = new GoogleGenAI({ apiKey });
