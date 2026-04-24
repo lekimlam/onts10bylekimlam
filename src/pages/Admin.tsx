@@ -3,15 +3,16 @@ import { useAuth } from '@/src/lib/auth-context';
 import { Navigate, Link } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
-import { Users, BookOpen, Settings, AlertTriangle, CheckCircle2, Clock, Trash2, Key, Mail, Shield, User as UserIcon, X, Search, Layers, PlaySquare, Trophy, Plus, HelpCircle, Database } from 'lucide-react';
+import { Users, BookOpen, Settings, AlertTriangle, CheckCircle2, Clock, Trash2, Key, Mail, Shield, User as UserIcon, X, Search, Layers, PlaySquare, Trophy, Plus, HelpCircle, Database, Sparkles, Upload, FileJson } from 'lucide-react';
 import { db } from '@/src/lib/firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import { collection, query, getDocs, doc, getDoc, setDoc, addDoc, deleteDoc, orderBy, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
+import { GoogleGenAI } from '@google/genai';
 
 export function Admin() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'content' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'content' | 'ai' | 'settings'>('overview');
   const [contentSubTab, setContentSubTab] = useState<'grammar' | 'vocabulary' | 'practice' | 'exam'>('grammar');
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -22,6 +23,12 @@ export function Admin() {
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editingContent, setEditingContent] = useState<any | null>(null);
   const [newPassword, setNewPassword] = useState('');
+
+  // AI & Import states
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
+  const [isGeneratingData, setIsGeneratingData] = useState(false);
+  const [targetCollection, setTargetCollection] = useState("flashcards");
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
@@ -392,6 +399,130 @@ export function Admin() {
     }
   };
 
+  const handleGenerateAI = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsGeneratingData(true);
+    setAiResponse("Đang phân tích và khởi tạo dữ liệu mẫu...");
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Chưa cấu hình GEMINI_API_KEY trong môi trường ứng dụng (Project Settings).");
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
+      
+      const schemas: any = {
+        flashcards: {
+          type: "object",
+          properties: {
+            word: { type: "string" },
+            meaning: { type: "string" },
+            pronunciation: { type: "string" },
+            example: { type: "string" },
+            topic: { type: "string" }
+          },
+          required: ["word", "meaning"]
+        },
+        questions: {
+          type: "object",
+          properties: {
+            type: { type: "string", description: "multiple_choice, fill_blank, sorting, listening" },
+            content: { type: "string" },
+            options: { type: "array", items: { type: "string" } },
+            correctAnswer: { type: "string" },
+            explanation: { type: "string" },
+            difficulty: { type: "string", description: "easy, medium, hard" }
+          },
+          required: ["type", "content", "correctAnswer"]
+        },
+        grammar: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            description: { type: "string" },
+            structure: { type: "string" },
+            signs: { type: "array", items: { type: "string" } },
+            order: { type: "number" }
+          },
+          required: ["title", "description", "structure"]
+        },
+        exams: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            description: { type: "string" },
+            durationMinutes: { type: "number" },
+            questions: { type: "array" }
+          },
+          required: ["title", "durationMinutes"]
+        }
+      };
+
+      const prompt = `Bạn là chuyên gia về Tiếng Anh và dữ liệu JSON.
+Nhiệm vụ: Tạo dữ liệu mẫu cho bảng "${targetCollection}" dựa trên yêu cầu: "${aiPrompt}".
+Yêu cầu: Trả về một mảng JSON các đối tượng phù hợp với cấu trúc sau.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "array",
+            items: schemas[targetCollection]
+          }
+        }
+      });
+
+      const text = response.text || "";
+      setAiResponse(text);
+    } catch(err: any) {
+      toast.error("Lỗi AI (Flash): " + err.message);
+      setAiResponse("");
+    } finally {
+      setIsGeneratingData(false);
+    }
+  };
+
+  const handleImportJSON = async (jsonData: string) => {
+    try {
+      if (!jsonData.trim()) return;
+      const data = JSON.parse(jsonData);
+      if (!Array.isArray(data)) {
+        toast.error("Dữ liệu phải là một mảng JSON (Array [ { ... } ])");
+        return;
+      }
+      if (!window.confirm(`Bồ sắp nhập dữ liệu ${data.length} nội dung vào collection "${targetCollection}". Tiếp tục chứ?`)) return;
+
+      setUpdating(true);
+      let count = 0;
+      for (const item of data) {
+         await addDoc(collection(db, targetCollection), {
+            ...item,
+            createdAt: new Date().toISOString()
+         });
+         count++;
+      }
+      toast.success(`Đã thêm thành công ${count} nội dung!`);
+      setAiResponse(""); // Clear sau khi nhập thành công
+    } catch(err: any) {
+      toast.error("Lỗi Parse/Nhập dữ liệu: " + err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setAiResponse(event.target?.result as string);
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input để cho phép tải file cùng tên lần sau nều cần
+  };
+
   useEffect(() => {
     const fetchMaintenance = async () => {
       const docRef = doc(db, 'settings', 'maintenance');
@@ -468,6 +599,12 @@ export function Admin() {
           className={`px-4 md:px-6 py-2 rounded-2xl font-bold transition-all text-sm md:text-base ${activeTab === 'content' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50'}`}
         >
           Quản lý Nội dung
+        </button>
+        <button 
+          onClick={() => setActiveTab('ai')}
+          className={`px-4 md:px-6 py-2 rounded-2xl font-bold transition-all text-sm md:text-base ${activeTab === 'ai' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50'}`}
+        >
+          Trợ lý AI & Nhập liệu
         </button>
         <button 
           onClick={() => setActiveTab('settings')}
@@ -750,6 +887,104 @@ export function Admin() {
               </table>
             </div>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'ai' && (
+        <div className="space-y-8">
+           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3">
+                   <Sparkles className="text-amber-500" /> Trợ lý AI & Nhập liệu
+                </h2>
+                <p className="text-slate-500 font-medium">Sử dụng sức mạnh của Gemini để sinh dữ liệu mẫu hoặc nhập từ file JSON.</p>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="rounded-[32px] border-2 border-slate-200 shadow-none hover:border-slate-300 transition-all overflow-hidden h-fit">
+                 <CardHeader className="bg-slate-50 p-6 border-b-2 border-slate-100">
+                    <CardTitle className="font-black text-slate-800 flex items-center gap-2">
+                       Tạo dữ liệu bằng AI
+                    </CardTitle>
+                 </CardHeader>
+                 <CardContent className="p-6 space-y-4">
+                    <p className="text-sm font-medium text-slate-500">
+                       Nhập yêu cầu để Gemini tạo dữ liệu mẫu (Ví dụ: "Tạo 5 flashcards chủ đề gia đình", "Tạo 5 câu trắc nghiệm ngữ pháp quá khứ đơn").
+                    </p>
+                    <textarea 
+                       rows={4}
+                       placeholder="Nhập yêu cầu tạo dữ liệu vào đây..."
+                       value={aiPrompt}
+                       onChange={(e) => setAiPrompt(e.target.value)}
+                       className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-medium resize-none focus:border-indigo-500 transition-all"
+                    />
+                    <Button 
+                       onClick={handleGenerateAI}
+                       disabled={isGeneratingData || !aiPrompt.trim()}
+                       className="w-full h-12 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black shadow-lg shadow-slate-200 flex items-center justify-center gap-2"
+                    >
+                       {isGeneratingData ? (
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                       ) : (
+                          <><Sparkles size={18} /> TẠO DỮ LIỆU JSON</>
+                       )}
+                    </Button>
+                 </CardContent>
+              </Card>
+
+              <Card className="rounded-[32px] border-2 border-slate-200 shadow-none hover:border-slate-300 transition-all overflow-hidden">
+                 <CardHeader className="bg-slate-50 p-6 border-b-2 border-slate-100 flex flex-row items-center justify-between">
+                    <CardTitle className="font-black text-slate-800 flex items-center gap-2">
+                       <FileJson size={20} /> Kết quả JSON / Upload
+                    </CardTitle>
+                    <div>
+                       <input 
+                         type="file" 
+                         accept=".json" 
+                         id="json-upload" 
+                         className="hidden" 
+                         onChange={handleFileUpload} 
+                       />
+                       <label htmlFor="json-upload" className="cursor-pointer bg-white border-2 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
+                          <Upload size={14} /> Tải file lên
+                       </label>
+                    </div>
+                 </CardHeader>
+                 <CardContent className="p-6 space-y-4">
+                    <textarea 
+                       rows={8}
+                       placeholder="[\n  {\n    'word': 'Sample',\n    'meaning': 'Mẫu'\n  }\n]"
+                       value={aiResponse}
+                       onChange={(e) => setAiResponse(e.target.value)}
+                       className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-mono text-sm tracking-tight resize-none focus:border-indigo-500 transition-all whitespace-pre"
+                    />
+                    
+                    <div className="pt-2 border-t-2 border-slate-100 space-y-4">
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nhập vào Collection (Bảng dữ liệu)</label>
+                       <div className="flex flex-col md:flex-row gap-4">
+                          <select 
+                             value={targetCollection}
+                             onChange={(e) => setTargetCollection(e.target.value)}
+                             className="flex-1 h-14 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 font-bold focus:border-indigo-500"
+                          >
+                             <option value="flashcards">Từ vựng (flashcards)</option>
+                             <option value="questions">Câu hỏi luyện tập (questions)</option>
+                             <option value="grammar">Ngữ pháp (grammar)</option>
+                             <option value="exams">Đề thi (exams)</option>
+                          </select>
+                          <Button 
+                             onClick={() => handleImportJSON(aiResponse)}
+                             disabled={updating || !aiResponse.trim() || isGeneratingData}
+                             className="h-14 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black shadow-lg shadow-emerald-200"
+                          >
+                             {updating ? 'ĐANG NHẬP...' : 'NHẬP VÀO DATABASE'}
+                          </Button>
+                       </div>
+                    </div>
+                 </CardContent>
+              </Card>
+           </div>
         </div>
       )}
 
