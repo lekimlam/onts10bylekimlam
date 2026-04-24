@@ -455,6 +455,27 @@ export function Admin() {
     }
   };
 
+  const handleDeleteAllContent = async () => {
+    if (!window.confirm("Bạn CÓ CHẮC CHẮN muốn xoá TOÀN BỘ dữ liệu của mục này không? Hành động này không thể hoàn tác!")) return;
+    setUpdating(true);
+    try {
+      const collectionName = contentSubTab === 'grammar' ? 'grammar' 
+                          : contentSubTab === 'vocabulary' ? 'flashcards'
+                          : contentSubTab === 'practice' ? 'questions'
+                          : 'exams';
+      const q = query(collection(db, collectionName));
+      const snap = await getDocs(q);
+      const deletePromises = snap.docs.map(d => deleteDoc(doc(db, collectionName, d.id)));
+      await Promise.all(deletePromises);
+      toast.success("Đã xoá toàn bộ nội dung thành công!");
+      fetchContent();
+    } catch (err: any) {
+      toast.error("Lỗi khi xoá toàn bộ nội dung: " + err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const handleUpdateUser = async () => {
     if (!editingUser) return;
     
@@ -785,6 +806,14 @@ export function Admin() {
               <p className="text-slate-500 font-medium">Thêm, sửa, xóa các bài học và câu hỏi.</p>
             </div>
             <div className="flex flex-wrap gap-3">
+              <Button 
+                onClick={handleDeleteAllContent}
+                variant="outline"
+                disabled={updating}
+                className="rounded-2xl h-12 px-6 font-bold border-2 border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200 flex items-center gap-2"
+              >
+                <Trash2 size={18} /> Xoá Tất Cả
+              </Button>
               <Button 
                 onClick={seedData} 
                 variant="outline"
