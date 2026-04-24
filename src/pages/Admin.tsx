@@ -248,15 +248,18 @@ export function Admin() {
       const vocabRef = collection(db, 'flashcards');
       const vocabItems = [
         { word: 'Environment', meaning: 'Môi trường', pronunciation: '/ɪnˈvaɪrənmənt/', example: 'We must protect the environment.', topic: 'Nature', createdAt: now },
-        { word: 'Pollution', meaning: 'Sự ô nhiễm', pronunciation: '/pəˈluːʃn/', example: 'Air pollution is a big problem.', topic: 'Nature', createdAt: now },
+        { word: 'Pollution', meaning: 'Sự ô nhiễm', pronunciation: '/pəluːʃn/', example: 'Air pollution is a big problem.', topic: 'Nature', createdAt: now },
         { word: 'Benefit', meaning: 'Lợi ích', pronunciation: '/ˈbenɪfɪt/', example: 'Reading books has many benefits.', topic: 'Education', createdAt: now },
         { word: 'Volunteer', meaning: 'Tình nguyện viên', pronunciation: '/ˌvɒlənˈtɪə(r)/', example: 'They are working as volunteers.', topic: 'Community', createdAt: now },
         { word: 'Technology', meaning: 'Công nghệ', pronunciation: '/tekˈnɒlədʒi/', example: 'Technology changes our lives.', topic: 'Science', createdAt: now },
         { word: 'Global Warming', meaning: 'Nóng lên toàn cầu', pronunciation: '/ˌɡləʊbl ˈwɔːmɪŋ/', example: 'Global warming is a serious threat.', topic: 'Nature', createdAt: now },
-        { word: 'Renewable', meaning: 'Có thể tái tạo', pronunciation: '/rɪˈnjuːəbl/', example: 'Solar energy is a renewable source.', topic: 'Nature', createdAt: now },
         { word: 'Sustainable', meaning: 'Bền vững', pronunciation: '/səˈsteɪnəbl/', example: 'We need sustainable development.', topic: 'Science', createdAt: now },
         { word: 'Biodiversity', meaning: 'Đa dạng sinh học', pronunciation: '/ˌbaɪəʊdaɪˈvɜːsəti/', example: 'Protecting biodiversity is vital.', topic: 'Nature', createdAt: now },
         { word: 'Conservation', meaning: 'Sự bảo tồn', pronunciation: '/ˌkɒnsəˈveɪʃn/', example: 'The conservation of nature is a duty.', topic: 'Nature', createdAt: now },
+        { word: 'Ancestor', meaning: 'Tổ tiên', pronunciation: '/ˈænsestə(r)/', example: 'Our ancestors lived in caves.', topic: 'Family', createdAt: now },
+        { word: 'Generation', meaning: 'Thế hệ', pronunciation: '/ˌdʒenəˈreɪʃn/', example: 'Gap between generations is common.', topic: 'Family', createdAt: now },
+        { word: 'Heritage', meaning: 'Di sản', pronunciation: '/ˈherɪtɪdʒ/', example: 'Viet Nam has many cultural heritages.', topic: 'Culture', createdAt: now },
+        { word: 'Independent', meaning: 'Độc lập', pronunciation: '/ˌɪndɪˈpendənt/', example: 'Viet Nam became independent in 1945.', topic: 'Society', createdAt: now },
         { word: 'Adventure', meaning: 'Cuộc phiêu lưu', pronunciation: '/ədˈventʃə(r)/', example: 'The book is about a great adventure.', topic: 'Book', createdAt: now }
       ];
       for (const item of vocabItems) await addDoc(vocabRef, item);
@@ -458,9 +461,13 @@ export function Admin() {
         }
       };
 
-      const prompt = `Bạn là chuyên gia về Tiếng Anh và dữ liệu JSON.
-Nhiệm vụ: Tạo dữ liệu mẫu cho bảng "${targetCollection}" dựa trên yêu cầu: "${aiPrompt}".
-Yêu cầu: Trả về một mảng JSON các đối tượng phù hợp với cấu trúc sau.`;
+      const prompt = `Bạn là chuyên gia về Tiếng Anh và cấu trúc dữ liệu JSON.
+Hành động: Phân tích yêu cầu "${aiPrompt}" và tạo ra bộ dữ liệu mẫu phù hợp cho bảng "${targetCollection}".
+Lưu ý đặc biệt:
+- Nếu yêu cầu là một danh sách từ vựng thô, hãy chia chúng thành các "topic" (chủ đề) Tiếng Anh phù hợp (ví dụ: Family, Work, Nature, Tech...).
+- Đảm bảo "pronunciation" (phiên âm) chính xác theo chuẩn IPA.
+- Phần "example" phải là một câu Tiếng Anh hay, minh họa rõ cách dùng từ.
+- Trả về kết quả là một MẢNG các đối tượng JSON hợp lệ.`;
 
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",

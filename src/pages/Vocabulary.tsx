@@ -38,6 +38,7 @@ export function Vocabulary() {
   const [streak, setStreak] = useState(0);
   const [sessionXp, setSessionXp] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTopic, setSelectedTopic] = useState<string>('all');
 
   // Game specific state
   const [scrambled, setScrambled] = useState<string[]>([]);
@@ -94,7 +95,18 @@ export function Vocabulary() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isFlipped, userInput, activeTab]);
 
-  const currentCard = cards[currentIndex];
+  const topics = ['all', ...Array.from(new Set(allCards.map(c => c.topic).filter(Boolean))) as string[]];
+
+  const filteredDueCards = cards.filter(c => selectedTopic === 'all' || c.topic === selectedTopic);
+
+  useEffect(() => {
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setUserInput('');
+    setFeedback('pending');
+  }, [selectedTopic]);
+
+  const currentCard = filteredDueCards[currentIndex];
 
   const playAudio = (text: string) => {
     if ('speechSynthesis' in window) {
@@ -149,7 +161,9 @@ export function Vocabulary() {
     setIsFlipped(false);
     setFeedback('pending');
     setUserInput('');
-    setCurrentIndex((prev) => (prev + 1) % cards.length);
+    if (filteredDueCards.length > 0) {
+      setCurrentIndex((prev) => (prev + 1) % filteredDueCards.length);
+    }
   };
 
   // Game Logic
@@ -189,10 +203,12 @@ export function Vocabulary() {
     if (activeTab === 'game' && currentCard) setupGame(currentCard);
   }, [activeTab, currentIndex]);
 
-  const filteredCards = allCards.filter(c => 
-    c.word.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.meaning.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCards = allCards.filter(c => {
+    const matchesSearch = c.word.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         c.meaning.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTopic = selectedTopic === 'all' || c.topic === selectedTopic;
+    return matchesSearch && matchesTopic;
+  });
 
   const masteredCount = allCards.filter(c => (c.level || 0) >= 3).length;
 
@@ -201,6 +217,24 @@ export function Vocabulary() {
   return (
     <div className="max-w-xl mx-auto h-full pt-4 pb-20 md:pb-8 flex flex-col items-center px-4 relative font-sans">
       <div className="fixed inset-0 cyber-grid opacity-20 pointer-events-none -z-10" />
+
+      {/* Topic Switcher */}
+      {topics.length > 1 && (
+        <div className="w-full flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-2">
+          {topics.map(topic => (
+            <button
+              key={topic}
+              onClick={() => setSelectedTopic(topic)}
+              className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border-2
+                ${selectedTopic === topic 
+                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' 
+                  : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-200'}`}
+            >
+              {topic === 'all' ? 'Tất cả' : topic}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Tab Switcher */}
       <div className="w-full flex bg-white/80 backdrop-blur-md rounded-2xl p-1 border border-slate-200 mb-6 shadow-sm overflow-x-auto no-scrollbar">
@@ -231,75 +265,90 @@ export function Vocabulary() {
             key="challenge" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             className="w-full flex flex-col items-center"
           >
-            {/* Challenge UI... */}
-            <div className="w-full bg-white rounded-3xl border-2 border-slate-900 p-4 mb-6 shadow-[0_4px_0_#1e293b]">
-              <div className="flex justify-between items-center mb-4">
-                <div className="bg-slate-100 rounded-full px-3 py-1 flex items-center gap-2 border border-slate-200">
-                  <span className="text-[10px] font-black text-slate-500 uppercase">Input</span>
-                  <button onClick={() => setStudyMode(studyMode === 'vn-en' ? 'en-vn' : 'vn-en')} className="text-[10px] font-black text-indigo-600 bg-white px-2 py-0.5 rounded-full shadow-sm">
-                    {studyMode === 'vn-en' ? 'VN → EN' : 'EN → VN'}
-                  </button>
-                </div>
-                <div className="flex gap-4 text-[10px] font-black text-slate-400 uppercase">
-                  <button onClick={() => window.location.reload()} className="hover:text-indigo-600">Reset</button>
-                  <button onClick={() => setActiveTab('stats')} className="hover:text-indigo-600">Stats</button>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="bg-amber-100 px-3 py-1.5 rounded-xl border-2 border-amber-200 text-amber-700 font-black text-xs">
-                  💰 {sessionXp} XP
-                </div>
-                <div className="flex-1 flex items-center gap-2">
-                  <span className="text-[10px] font-black text-slate-600">{currentIndex + 1}/{cards.length}</span>
-                  <div className="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div animate={{ width: `${((currentIndex + 1) / cards.length) * 100}%` }} className="h-full bg-emerald-500" />
+            {filteredDueCards.length > 0 ? (
+              <>
+                <div className="w-full bg-white rounded-3xl border-2 border-slate-900 p-4 mb-6 shadow-[0_4px_0_#1e293b]">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="bg-slate-100 rounded-full px-3 py-1 flex items-center gap-2 border border-slate-200">
+                      <span className="text-[10px] font-black text-slate-500 uppercase">Input</span>
+                      <button onClick={() => setStudyMode(studyMode === 'vn-en' ? 'en-vn' : 'vn-en')} className="text-[10px] font-black text-indigo-600 bg-white px-2 py-0.5 rounded-full shadow-sm">
+                        {studyMode === 'vn-en' ? 'VN → EN' : 'EN → VN'}
+                      </button>
+                    </div>
+                    <div className="flex gap-4 text-[10px] font-black text-slate-400 uppercase">
+                      <button onClick={() => window.location.reload()} className="hover:text-indigo-600">Reset</button>
+                      <button onClick={() => setActiveTab('stats')} className="hover:text-indigo-600">Stats</button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-amber-100 px-3 py-1.5 rounded-xl border-2 border-amber-200 text-amber-700 font-black text-xs">
+                      💰 {sessionXp} XP
+                    </div>
+                    <div className="flex-1 flex items-center gap-2">
+                      <span className="text-[10px] font-black text-slate-600">{currentIndex + 1}/{filteredDueCards.length}</span>
+                      <div className="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div animate={{ width: `${((currentIndex + 1) / filteredDueCards.length) * 100}%` }} className="h-full bg-emerald-500" />
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                <div className="relative h-[400px] w-full mb-6 cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={isFlipped ? 'back' : 'front'}
+                      initial={{ rotateY: isFlipped ? -90 : 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: isFlipped ? 90 : -90, opacity: 0 }}
+                      className={`w-full h-full rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center shadow-xl border-b-4
+                        ${isFlipped ? 'bg-white border-indigo-100 text-slate-800' : 'bg-gradient-to-br from-indigo-500 to-indigo-700 border-indigo-900 text-white'}`}
+                    >
+                      {!isFlipped ? (
+                        <>
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-6 bg-white/10 px-3 py-1 rounded-full">Guess the Word</span>
+                          <h2 className="text-4xl font-black mb-6 leading-tight">{studyMode === 'vn-en' ? currentCard?.meaning : currentCard?.word}</h2>
+                          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 max-w-[220px]">
+                            <p className="text-[10px] italic font-medium opacity-80 leading-relaxed uppercase">Exp: {currentCard?.example}</p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-6">Answer</span>
+                          <h2 className="text-4xl font-black text-slate-800 mb-2">{currentCard?.word}</h2>
+                          <p className="text-base font-mono font-bold text-indigo-500 mb-4">{currentCard?.pronunciation}</p>
+                          <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-50"><p className="text-sm font-bold text-slate-600">{currentCard?.meaning}</p></div>
+                        </>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                <div className="w-full flex gap-2 mb-6">
+                  <Input placeholder="Type answer..." value={userInput} onChange={(e) => setUserInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && checkAnswer()} className="flex-1 h-11 px-4 rounded-xl shadow-sm font-bold" />
+                  <Button onClick={checkAnswer} className="h-11 px-6 rounded-xl bg-emerald-500 text-white font-black">Check</Button>
+                </div>
+
+                <div className="w-full flex justify-between items-center bg-white p-2 rounded-2xl border border-slate-100">
+                  <Button onClick={() => setCurrentIndex(prev => (prev - 1 + filteredDueCards.length) % filteredDueCards.length)} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400"><ArrowRight className="w-4 h-4 rotate-180" /></Button>
+                  <div className="flex gap-2">
+                    <Button onClick={() => playAudio(currentCard?.word)} className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-white"><Volume2 className="w-4 h-4" /></Button>
+                    <Button onClick={skipCard} className="h-10 px-4 rounded-xl bg-orange-50 text-orange-600 font-black text-xs">Quên</Button>
+                    <Button onClick={masterCard} className="h-10 px-4 rounded-xl bg-emerald-50 text-emerald-600 font-black text-xs">Thuộc</Button>
+                  </div>
+                  <Button onClick={() => setCurrentIndex(prev => (prev + 1) % filteredDueCards.length)} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400"><ArrowRight className="w-4 h-4" /></Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-20 px-6 bg-white/50 backdrop-blur-sm rounded-[3rem] border-2 border-dashed border-slate-200 animate-in fade-in zoom-in duration-500">
+                <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/5">
+                  <CheckCircle2 className="text-emerald-500 w-10 h-10" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-800 mb-3">Đã xong hết rồi!</h3>
+                <p className="text-slate-500 font-medium mb-8">Bồ không còn từ nào cần học trong chủ đề {selectedTopic === 'all' ? 'này' : `<${selectedTopic}>`} hôm nay. Tuyệt vời quá!</p>
+                <div className="flex flex-col gap-3">
+                  <Button onClick={() => setSelectedTopic('all')} className="w-full py-6 rounded-2xl bg-indigo-600 text-white font-black hover:bg-indigo-700 shadow-lg shadow-indigo-200">HỌC TẤT CẢ CHỦ ĐỀ</Button>
+                  <Button onClick={() => setActiveTab('notebook')} variant="ghost" className="text-indigo-600 font-black">XEM LẠI SỔ TAY</Button>
+                </div>
               </div>
-            </div>
-
-            <div className="relative h-[400px] w-full mb-6 cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={isFlipped ? 'back' : 'front'}
-                  initial={{ rotateY: isFlipped ? -90 : 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: isFlipped ? 90 : -90, opacity: 0 }}
-                  className={`w-full h-full rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center shadow-xl border-b-4
-                    ${isFlipped ? 'bg-white border-indigo-100 text-slate-800' : 'bg-gradient-to-br from-indigo-500 to-indigo-700 border-indigo-900 text-white'}`}
-                >
-                  {!isFlipped ? (
-                    <>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-6 bg-white/10 px-3 py-1 rounded-full">Guess the Word</span>
-                      <h2 className="text-4xl font-black mb-6 leading-tight">{studyMode === 'vn-en' ? currentCard?.meaning : currentCard?.word}</h2>
-                      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 max-w-[220px]">
-                        <p className="text-[10px] italic font-medium opacity-80 leading-relaxed uppercase">Exp: {currentCard?.example}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-6">Answer</span>
-                      <h2 className="text-4xl font-black text-slate-800 mb-2">{currentCard?.word}</h2>
-                      <p className="text-base font-mono font-bold text-indigo-500 mb-4">{currentCard?.pronunciation}</p>
-                      <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-50"><p className="text-sm font-bold text-slate-600">{currentCard?.meaning}</p></div>
-                    </>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            <div className="w-full flex gap-2 mb-6">
-              <Input placeholder="Type answer..." value={userInput} onChange={(e) => setUserInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && checkAnswer()} className="flex-1 h-11 px-4 rounded-xl shadow-sm font-bold" />
-              <Button onClick={checkAnswer} className="h-11 px-6 rounded-xl bg-emerald-500 text-white font-black">Check</Button>
-            </div>
-
-            <div className="w-full flex justify-between items-center bg-white p-2 rounded-2xl border border-slate-100">
-              <Button onClick={() => setCurrentIndex(prev => (prev - 1 + cards.length) % cards.length)} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400"><ArrowRight className="w-4 h-4 rotate-180" /></Button>
-              <div className="flex gap-2">
-                <Button onClick={() => playAudio(currentCard?.word)} className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-white"><Volume2 className="w-4 h-4" /></Button>
-                <Button onClick={skipCard} className="h-10 px-4 rounded-xl bg-orange-50 text-orange-600 font-black text-xs">Quên</Button>
-                <Button onClick={masterCard} className="h-10 px-4 rounded-xl bg-emerald-50 text-emerald-600 font-black text-xs">Thuộc</Button>
-              </div>
-              <Button onClick={() => setCurrentIndex(prev => (prev + 1) % cards.length)} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400"><ArrowRight className="w-4 h-4" /></Button>
-            </div>
+            )}
           </motion.div>
         )}
 
